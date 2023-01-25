@@ -1,5 +1,8 @@
 # Expclip
+![](expclip-logo.svg)
+
 This is a Vue Application that enables Kindle users to view, edit and manage their highlights in My Clipping.txt file. 
+
 
 ## Build Setup
 ```bash
@@ -13,6 +16,7 @@ npm run dev
 npm run build
 
 ```
+
 
 ## Screenshot 
 ![](Screenshot0.png)
