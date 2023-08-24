@@ -8,10 +8,17 @@
       <el-table 
       :data="jsonRecords"
       element-loading-text="Loading"
-      border
+      style="width: 80%; font-family: Poppins, Playfair, Switzer, Inter, DM Sans, Mona Sans, Arial, sans-serif; font-size: 18px; color:rgb(70, 68, 81); 
+      border-radius: 15px; 
+      /* box-shadow: rgba(0, 0, 0, 0.09) 0px 3px 12px; */
+      box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;
+      "
+      :cell-style="{padding: '20px 10px 20px 10px', }"
+      :header-cell-style="{ background: 'rgb(249,249,251)', color: 'rgb(163,165,185)', padding: '10px 10px 10px 10px', }"
+      max-height="600"
+      stripe
       fit
       highlight-current-row
-      style="width: 80%"
       >
         <el-table-column 
           :prop="item.prop"
@@ -274,7 +281,8 @@ export default {
   }
 }
 </script>
-
+@import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair&display=swap');
 <style>
 .form-text{
   font-family: Arial, sans-serif;

@@ -10,7 +10,7 @@ This is a Vue Application that enables Kindle users to view, edit and manage the
 npm install
 
 # serve with hot reload at localhost:8080
-npm run dev
+npm run serve
 
 # build for production
 npm run build
