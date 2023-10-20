@@ -1,299 +1,147 @@
 <template>
-  <div class="form-text"><b>Expclip</b></div>
-  <div class="center-container">
-    <input type="file" ref="doc" @change="readFile()" />
-    <el-button type="primary" :icon="Share" @click="exportFile()" />
-  </div>
-  <div class="center-container">
-      <el-table 
-      :data="jsonRecords"
-      element-loading-text="Loading"
-      style="width: 80%; font-family: Poppins, Playfair, Switzer, Inter, DM Sans, Mona Sans, Arial, sans-serif; font-size: 18px; color:rgb(70, 68, 81); 
-      border-radius: 15px; 
-      /* box-shadow: rgba(0, 0, 0, 0.09) 0px 3px 12px; */
-      box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;
-      "
-      :cell-style="{padding: '20px 10px 20px 10px', }"
-      :header-cell-style="{ background: 'rgb(249,249,251)', color: 'rgb(163,165,185)', padding: '10px 10px 10px 10px', }"
-      max-height="600"
-      stripe
-      fit
-      highlight-current-row
-      >
-        <el-table-column 
-          :prop="item.prop"
-          :label="item.label"
-          v-for="item in tableHeader"
-          :key="item.prop"
-          align="left"
-        >
-          <template #default="scope">
-            <div v-show="scope.row.Editable">
-              <el-input
-                v-model="scope.row[item.prop]"
-                :placeholder="`Please enter${item.label}`"
-              />
+  <div id="app">
+    <div style="">
+      <el-container style="overflow: hidden;">
+        <el-container style="max-height: 100vh;">
+          <el-aside class="aside-container">
+            <el-menu default-active="1" class="app-aside-menu" :collapse="isCollapse" @open="handleOpen"
+              @close="handleClose" router>
+              <img src="./assets/expclip-logo.svg" class="logo-svg" />
+              <el-menu-item index="/">
+                <svg-icon type="mdi" :path="home_svg_path" class="menu_logo_svg"></svg-icon>
+                <template #title>Home</template>
+              </el-menu-item>
+              <el-sub-menu index="2">
+                <template #title>
+                  <svg-icon type="mdi" :path="bookshelf_svg_path" class="menu_logo_svg" route="/books"></svg-icon>
+                  <span>Books</span>
+                </template>
+                <el-menu-item-group>
+                  <template #title><span>Group One</span></template>
+                  <el-menu-item index="2-1">item one</el-menu-item>
+                  <el-menu-item index="2-2">item two</el-menu-item>
+                </el-menu-item-group>
+                <el-menu-item-group title="Group Two">
+                  <el-menu-item index="2-3">item three</el-menu-item>
+                </el-menu-item-group>
+                <el-sub-menu index="2-4">
+                  <template #title><span>item four</span></template>
+                  <el-menu-item index="2-4-1">item one</el-menu-item>
+                </el-sub-menu>
+              </el-sub-menu>
+              <el-menu-item index="/quotes">
+                <svg-icon type="mdi" :path="quote_svg_path" class="menu_logo_svg"></svg-icon>
+                <template #title>Quotes</template>
+              </el-menu-item>
+              <el-menu-item index="/books">
+                <svg-icon type="mdi" :path="export_svg_path" class="menu_logo_svg"></svg-icon>
+                <template #title>Export</template>
+              </el-menu-item>
+            </el-menu>
+          </el-aside>
+          <el-main>
+            <div class="page-container">
+              <el-scrollbar>
+                <router-view />
+              </el-scrollbar>
             </div>
-            
-            <div v-show="!scope.row.Editable">
-              {{ scope.row[item.prop]}}
-            </div>
-          
-          </template>
-          
-        </el-table-column>
-        <el-table-column label="Action" align="left" width="200">
-          <template #default="scope">
-            <el-button
-              v-show="!scope.row.Editable"
-              size="small"
-              plain
-              @click="scope.row.Editable = true"
-            >Edit</el-button>
-            <el-button
-              v-show="scope.row.Editable"
-              size="small"
-              type="success"
-              @click="handleEdit(scope.$index, scope.row)"
-            >Confirm</el-button>
-            <el-button
-              size="small"
-              type="danger"
-              plain
-              @click="handleDelete(scope.$index)"
-            >Delete</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+          </el-main>
+        </el-container>
+      </el-container>
+    </div>
 
   </div>
 </template>
 
-<script setup>
-  import {Share} from '@element-plus/icons'
-</script>
-
 <script>
-import Swal from "sweetalert2";
-import FileSaver from "file-saver";
+import { ElMenu, ElMenuItem, ElMenuItemGroup, ElSubMenu, ElContainer, ElAside, ElMain, ElHeader,ElScrollbar } from 'element-plus';
+import SvgIcon from '@jamescoyle/vue-icon';
+import { mdiBookshelf, mdiCommentQuoteOutline, mdiHomeAnalytics, mdiExportVariant } from '@mdi/js';
+
 export default {
-  data () {
-    return {
-      file: null, 
-      content: null,
-      text_arr: null,
-      jsonRecords: null,
-      item : {
-        "Book" : '',
-        "Author" : '',
-        //"Datetime" : '',
-        "Quote" : '',
-      },
-      tableHeader: [
-        {
-          prop: "Book",
-          label: "Book Name",
-          type: "input",
-        },
-        {
-          prop: "Author",
-          label: "Author Name",
-          type: "input"
-        },/*
-        {
-          prop: "Datetime",
-          label: "Date",
-          type: "input"
-        },*/
-        {
-          prop: "Quote",
-          label: "My Quote",
-          type: "input"
-        }
-      ]
-    }
+  components: {
+    ElMenu,
+    ElMenuItem,
+    ElMenuItemGroup,
+    ElSubMenu,
+    ElContainer,
+    ElAside,
+    ElMain,
+    ElHeader,
+    SvgIcon,
+    ElScrollbar
   },
-  methods: {
-    readFile() {
-      
-      function getInfo(s){
-        let InfoLength = s.length;
-        let author_index_1 = s.indexOf('\r\n')-1;
-        let author_index_0 = 0;
-        let book_index_0 = 0;
-        let book_index_1 = 0;
-        let page_index_0 = s.indexOf('on page ') + 'on page '.length;
-        let page_index_1 = 0;
-        let location_index_0 = s.indexOf('| location ') + '| location '.length;
-        let location_index_1 = 0;
-        let week_index_0 = s.indexOf("| Added on ") + '| Added on '.length;
-        let week_index_1 = 0;
-        let datetime_index_0 = 0;
-        let datetime_index_1 = 0;
-        let quote_index_0 = 0;
-
-        for (let i = author_index_1; i >= 0; i--){
-          if (s[i]=='('){
-            author_index_0 = i+1;
-            book_index_1 = i-1;
-            break;
-          }
-        }
-        for (let i = page_index_0; i < InfoLength; i++){
-          if (s[i]=='|'){
-            page_index_1 = i-1;
-            break;
-          }
-        }
-        for (let i = location_index_0; i < InfoLength; i++){
-          if (s[i]=='|'){
-            location_index_1 = i-1;
-            break;
-          }
-        }
-        for (let i = week_index_0; i < InfoLength; i++){
-          if (s[i]==','){
-            week_index_1 = i;
-            datetime_index_0 = i+2;
-            break;
-          }
-        }
-        for (let i = datetime_index_0; i < InfoLength; i++){
-          if (s[i]==':'){
-            datetime_index_1 = i+6;
-            quote_index_0 = i+10;
-            break;
-          }
-        }
-
-        return [s.substring(book_index_0,book_index_1), 
-        s.substring(author_index_0, author_index_1), 
-        s.substring(page_index_0, page_index_1), 
-        s.substring(location_index_0, location_index_1), 
-        s.substring(week_index_0, week_index_1), 
-        s.substring(datetime_index_0, datetime_index_1), 
-        s.substring(quote_index_0, )];
-      }
-      
-      this.file = this.$refs.doc.files[0];
-      const reader = new FileReader();
-      if (this.file.name.includes('My Clippings')) { // Only My Clipping.txt is accepted
-        Swal.fire({
-          title:'Inputed.',
-          icon:'success'
-        });
-        reader.onload = (res) => {
-          this.content = res.target.result.toString();
-          let text = this.content;
-          text += "\r\n";
-          //text = text.replace(/(\r\n|\n|\r)/gm, "");
-          this.text_arr = text.split("==========\r\n");
-          var records = [];
-          
-          for (let i = 0; i < this.text_arr.length; i++) { // Loop through all entity in My Clipping.txt
-            var record = {
-              "index" : i,
-              "Book" : getInfo(this.text_arr[i])[0],
-              "Author" : getInfo(this.text_arr[i])[1],
-              "Page" : getInfo(this.text_arr[i])[2],
-              "Location" : getInfo(this.text_arr[i])[3],
-              "Week" : getInfo(this.text_arr[i])[4],
-              "Datetime" : getInfo(this.text_arr[i])[5],
-              "Quote": getInfo(this.text_arr[i])[6],
-              "Editable" : false
-            };
-            records.push(record);
-          }
-          records.pop();
-          this.jsonRecords = JSON.parse(JSON.stringify(records));
-          //console.log(this.jsonRecords);
-
-        };
-        reader.onerror = (err) => console.log(err);
-        reader.readAsText(this.file);
-
-      } else {
-        this.content = "";
-        Swal.fire({
-          title:'Please upload My Clippings.txt',
-          icon:'info'
-        });
-        reader.onload = (res) => {
-          console.log(res.target.result);
-        };
-        reader.onerror = (err) => console.log(err);
-        reader.readAsText(this.file);
-      }
-    }, handleDelete(index){
-      //console.log(index, row);
-      const swalWithBootstrapButtons = Swal.mixin({
-        customClass: {
-          confirmButton: 'success',
-          cancelButton: 'danger'
-        },
-        buttonsStyling: true
-      })
-      swalWithBootstrapButtons.fire({
-        title: 'Do you want to delete?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Delete!',
-        cancelButtonText: 'Cancel!',
-        reverseButtons: true
-      }).then((result) => {
-        if (result.isConfirmed) {
-          this.jsonRecords.splice(index,1);
-          swalWithBootstrapButtons.fire(
-            'Deleted!',
-            'The quote record has been deleted.',
-            'success'
-          )
-        }
-      })
-    }, handleEdit(index, row) {
-      //console.log(row);
-      row.Editable = false;
-      this.jsonRecords[index]["Book"] = row["Book"];
-      this.jsonRecords[index]["Author"] = row["Author"];
-      this.jsonRecords[index]["Quote"] = row["Quote"] + '\r\n';
-      //console.log(this.jsonRecords);
-    }, exportFile() {
-      const savePath = "My Clippings.txt";
-      // form the content of My Clipping.txt in string
-      let str_temp = "";
-      
-      // Follow the structure to generate the My Clipping.txt file
-      for (var i = 0; i < this.jsonRecords.length; i++){
-        str_temp += this.jsonRecords[i]["Book"];
-        str_temp += ' (' + this.jsonRecords[i]["Author"];
-        str_temp += ')\r\n- Your Highlight on page ' + this.jsonRecords[i]["Page"];
-        str_temp += ' | location ' + this.jsonRecords[i]["Location"];
-        str_temp += ' | Added on ' + this.jsonRecords[i]["Week"];
-        str_temp += ', ' + this.jsonRecords[i]["Datetime"];
-        str_temp += '\r\n\r\n' + this.jsonRecords[i]["Quote"];
-        str_temp += ("==========\r\n");
-      }
-      // export txt file using FileSaver
-      var blob = new Blob([str_temp], {type: "text/plain;charset=utf-8"});
-      FileSaver.saveAs(blob, savePath);
-
+  data() {
+    return {
+      bookshelf_svg_path: mdiBookshelf,
+      quote_svg_path: mdiCommentQuoteOutline,
+      home_svg_path: mdiHomeAnalytics,
+      export_svg_path: mdiExportVariant,
     }
   }
 }
 </script>
+
+<style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Playfair&display=swap');
-<style>
-.form-text{
-  font-family: Arial, sans-serif;
-  color: #5c616f;
-  margin: -15px -20px 20px -15px;
-  background: #dee1e9;
-  padding: 20px;
-  border-left: 4px solid #5c616f;
+
+:root {
+  /* --el-color-primary: #134563; */
+  --el-color-primary: rgb(102, 193, 179);
+  /* menu active */
+  --el-color-primary-light-3: #29abb4;
+  --el-color-primary-light-5: #8decec;
+  --el-color-primary-light-7: #aceaf0;
+  --el-color-primary-light-8: #c3e2f4;
+  --el-color-primary-light-9: #e0f8ee;
+  /* menu hover */
+  --el-color-primary-light-9: rgba(158, 205, 153, 0.2);
+  --el-color-primary-dark-2: #2d7ed0;
 }
-.center-container {
-  display: flex;
-  justify-content: center;
+
+body {
+  font-family: Poppins, Playfair, Switzer, Inter, DM Sans, Mona Sans, Arial, sans-serif;
+  font-size: 22px;
+  margin: 0px;
+  overflow: hidden;
+}
+
+.aside-container {
+  width: 15vw;
+}
+
+@media screen and (min-width: 768px) {
+  .aside-container {
+    width: 20vw;
+  }
+}
+
+.app-aside-menu {
+  min-height: 100vh;
+  /* background-color: #BDC5E41C; */
+}
+
+.logo-svg {
+  padding: 1rem 2.5rem 0rem 2.5rem;
+}
+
+.menu_logo_svg {
+  padding-right: 1rem;
+}
+
+
+.el-menu-item.is-active {
+  background-color: rgba(158, 205, 153, 0.2);
+}
+
+.el-menu-item {
+  border-radius: 45px;
+  margin: 0.5rem 1rem;
+}
+
+.el-sub-menu__title {
+  border-radius: 45px;
+  margin: 0.5rem 1rem;
 }
 </style>
