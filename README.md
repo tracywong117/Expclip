@@ -1,8 +1,6 @@
 # Expclip
 ![](expclip-logo.svg)
-
 This is a Vue Application that enables Kindle users to view, edit and manage their highlights in My Clipping.txt file. 
-
 
 ## Build Setup
 ```bash
@@ -10,13 +8,11 @@ This is a Vue Application that enables Kindle users to view, edit and manage the
 npm install
 
 # serve with hot reload at localhost:8080
-npm run serve
+npm run dev
 
 # build for production
 npm run build
-
 ```
 
-
 ## Screenshot 
-![](Screenshot0.png)
+![](Screenshot1.png)

@@ -1,12 +1,20 @@
 <template>
   <div class="page-container">
-    <el-breadcrumb :separator-icon="ArrowRight" style="font-size: 80px !important;">
+    <el-breadcrumb :separator-icon="ArrowRight" style="font-size: 40px !important;">
       <el-breadcrumb-item :to="{ path: '/books' }">Books</el-breadcrumb-item>
     </el-breadcrumb>
-
+    <div style="display: flex; justify-content: center;">
+      <div class="home-page-container" style="width: 75%;">
+        <!-- <el-upload drag class="upload-box" @change="readFile()" type="file" ref="doc" :multiple="false" :show-file-list="false">
+          <div class="el-upload__text">
+            Drop My Clipping.txt here or <em>click to upload</em>
+          </div>
+        </el-upload> -->
+      </div>
+    </div>
     <div class="center-container">
       <input type="file" ref="doc" @change="readFile()" />
-      <el-button type="primary" @click="exportFile()" ><svg-icon type="mdi" :path="export_svg_path"></svg-icon></el-button>
+      <el-button type="primary" @click="exportFile()"><svg-icon type="mdi" :path="export_svg_path"></svg-icon></el-button>
     </div>
     <div class="center-container">
       <el-table :data="jsonRecords" element-loading-text="Loading" style="
@@ -18,8 +26,7 @@
       box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;
       " :cell-style="{ padding: '20px 10px 20px 10px', }"
         :header-cell-style="{ background: 'rgb(249,249,251)', color: 'rgb(163,165,185)', padding: '10px 10px 10px 10px', }"
-        
-        stripe fit lazy highlight-current-row>
+        fit lazy highlight-current-row>
         <el-table-column :prop="item.prop" :label="item.label" v-for="item in tableHeader" :key="item.prop" align="left">
           <template #default="scope">
             <div v-show="scope.row.Editable">
@@ -36,7 +43,7 @@
         </el-table-column>
         <el-table-column label="Action" align="left" width="200">
           <template #default="scope">
-            <el-button v-show="!scope.row.Editable" size="small" plain @click="scope.row.Editable=true">Edit</el-button>
+            <el-button v-show="!scope.row.Editable" size="small" plain @click="scope.row.Editable = true">Edit</el-button>
             <el-button v-show="scope.row.Editable" size="small" type="success"
               @click="handleEdit(scope.$index, scope.row)">Confirm</el-button>
             <el-button size="small" type="danger" plain @click="handleDelete(scope.$index)">Delete</el-button>
@@ -49,7 +56,7 @@
 </template>
 
 <script>
-import { ElMenu, ElMenuItem, ElSubMenu, ElBreadcrumb, ElBreadcrumbItem, ElTable, ElTableColumn, ElButton, ElInput } from 'element-plus';
+import { ElMenu, ElMenuItem, ElSubMenu, ElBreadcrumb, ElBreadcrumbItem, ElTable, ElTableColumn, ElButton, ElInput, ElUpload } from 'element-plus';
 import Swal from "sweetalert2";
 import FileSaver from "file-saver";
 import SvgIcon from '@jamescoyle/vue-icon';
@@ -66,7 +73,9 @@ export default {
     ElTableColumn,
     ElButton,
     ElInput,
-    SvgIcon
+    SvgIcon,
+    ElUpload,
+
   },
   data() {
     return {
@@ -168,6 +177,7 @@ export default {
       }
 
       this.file = this.$refs.doc.files[0];
+      console.log(this.file);
       const reader = new FileReader();
       if (this.file.name.includes('My Clippings')) { // Only My Clipping.txt is accepted
         Swal.fire({
@@ -280,7 +290,7 @@ export default {
   font-size: 1.2rem;
 }
 
-.el-breadcrumb__item:last-child .el-breadcrumb__inner{
+.el-breadcrumb__item:last-child .el-breadcrumb__inner {
   color: var(--el-color-primary);
 }
 
