@@ -1,59 +1,175 @@
 <template>
 <div id="app" class="flex">
     <!-- Sidebar -->
-    <aside class="w-[18vw] border-r hidden md:flex flex-col justify-between fixed h-full">
-        <nav class="flex flex-col items-center py-5">
-            <img src="/icons/logo.svg" class="w-4/5 mb-5" />
-            <ul class="w-full flex flex-col">
-                <li class="mb-3">
+    <aside class="w-[250px] border-r hidden md:flex flex-col justify-between fixed h-full ">
+        <nav class="flex flex-col items-center">
+            <div class="flex justify-center pt-5">
+                <img src="/icons/logo.svg" class="w-4/5" />
+            </div>
+            <div class="flex justify-start gap-4 self-start mx-8 mb-4">
+                <Popover position="bottom">
+                    <template #trigger>
+                        <Tooltip position="bottom" autoHideDelay=0>
+                            <button class="bg-gray-50 p-2 rounded-full hover:bg-[#f0fdf4] transition-colors duration-200 stroke-gray-400 hover:stroke-[#9bce90] hover:border-[#f0fdf4]">
+                                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </button>
+                            <template #content>
+                                Add new
+                            </template>
+                        </Tooltip>
+                    </template>
+                    <div class="py-1 flex flex-col text-[14px]">
+                        <div class="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors">
+                            <span>Add new books</span>
+                        </div>
+                        <div class="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors">
+                            <span>Add new quotes</span>
+                        </div>
+                    </div>
+                </Popover>
+                <Popover position="bottom">
+                    <template #trigger>
+                        <Tooltip position="bottom">
+                            <button class="bg-gray-50 p-2 rounded-full hover:bg-[#f0fdf4] transition-colors duration-200 stroke-gray-400 hover:stroke-[#9bce90] hover:border-[#f0fdf4]">
+                                <svg class="w-6 h-6 " viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </button>
+                            <template #content>
+                                Import
+                            </template>
+                        </Tooltip>
+                    </template>
+                    <div class="py-1 flex flex-col text-[14px]">
+                        <div class="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors" @click="showImportDialog = !showImportDialog">
+                            <span>Import from Kindle Clipping</span>
+                        </div>
+                        <div class="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors">
+                            <span>Import from CSV</span>
+                        </div>
+                    </div>
+                </Popover>
+                <!-- <Dialog v-model:show="showImportDialog">
+                    <div class="text-xl font-semibold mb-3">Import Highlights from Kindle</div>
+                    <div class="text-md text-gray-500 mb-3">
+                        Kindle Clippings is the file that contains all the highlights and notes you've made on your Kindle device. You can import this file to get all your highlights and notes in one place.
+                    </div>
+                    <label class="border-dashed border-2 border-gray-300 p-10 text-center cursor-pointer hover:border-gray-400 transition block
+                    w-[50%] mx-auto">
+                        <div class="flex flex-col items-center">
+                            <img src="icons/file-text.svg" class="w-10 h-10 mb-2" alt="File icon" />
+                            <p v-if="!fileName" class="text-lg">
+                                Drop <em class="text-[#9bce90]">My Clipping.txt</em> here
+                            </p>
+                            <p v-else class="text-lg">
+                                Selected file: <em class="text-[#9bce90]">{{ fileName }}</em>
+                            </p>
+                        </div>
+                        <input type="file" class="hidden" accept=".txt" @change="handleFileUpload" />
+                    </label>
+
+                    <div class="flex justify-center mt-5">
+                        <button class="border bg-gray-50 hover:bg-[#f0fdf4] text-gray-400 hover:text-[#9bce90] px-20 py-2 rounded-lg  transition-colors">
+                            Upload
+                        </button>
+                    </div>
+
+                </Dialog> -->
+                <Dialog v-model:show="showImportDialog">
+                    <div class="text-xl font-semibold mb-3">Import Highlights from Kindle</div>
+                    <div class="text-md text-gray-500 mb-3">
+                        Kindle Clippings is the file that contains all the highlights and notes you've made on your Kindle device. You can import this file to get all your highlights and notes in one place.
+                    </div>
+                    <label class="border-dashed border-2 border-gray-300 p-10 text-center cursor-pointer hover:border-gray-400 transition block w-[50%] mx-auto">
+                        <div class="flex flex-col items-center">
+                            <img src="icons/file-text.svg" class="w-10 h-10 mb-2" alt="File icon" />
+                            <p v-if="!fileName" class="text-lg">
+                                Drop <em class="text-[#9bce90]">My Clipping.txt</em> here
+                            </p>
+                            <p v-else class="text-lg">
+                                Selected file: <em class="text-[#9bce90]">{{ fileName }}</em>
+                            </p>
+                        </div>
+                        <input type="file" class="hidden" accept=".txt" @change="handleFileUpload" />
+                    </label>
+
+                    <!-- Progress bar -->
+                    <div v-if="uploadProgress > 0" class="mt-5 w-[50%] mx-auto">
+                        <div class="bg-gray-200 rounded-full h-2.5">
+                            <div class="bg-[#9bce90] h-2.5 rounded-full" :style="{ width: uploadProgress + '%' }"></div>
+                        </div>
+                        <p class="text-center mt-2 text-sm text-gray-500">{{ uploadProgress }}% uploaded</p>
+                    </div>
+
+                    <!-- Upload and Cancel buttons -->
+                    <div class="flex justify-center mt-5 space-x-4">
+                        <button v-if="!isUploading" @click="uploadFile" class="border bg-gray-50 hover:bg-[#f0fdf4] text-gray-400 hover:text-[#9bce90] px-10 py-2 rounded-lg transition-colors">
+                            Upload
+                        </button>
+                        <button v-if="isUploading" @click="cancelUpload" class="border bg-gray-50 hover:bg-red-50 text-gray-400 hover:text-red-500 px-10 py-2 rounded-lg transition-colors">
+                            Cancel
+                        </button>
+                    </div>
+                </Dialog>
+            </div>
+            <div class="w-full flex flex-col">
+                <div class="mb-2">
                     <router-link to="/" class="flex items-center p-3 hover:bg-lime-100 mx-5 px-5 rounded-full" active-class="active-link">
                         <img src="/icons/home.svg" class="w-7 h-7 mr-3" />
                         <span>Home</span>
                     </router-link>
-                </li>
-                <li class="mb-3">
+                </div>
+                <div class="mb-2">
                     <router-link to="/books" class="flex items-center p-3 hover:bg-lime-100 mx-5 px-5 rounded-full" active-class="active-link">
                         <img src="/icons/book.svg" class="w-7 h-7 mr-3" />
                         <span>Books</span>
                     </router-link>
-                </li>
-                <li class="mb-3">
+                </div>
+                <div class="mb-2">
+                    <router-link to="/stats" class="flex items-center p-3 hover:bg-lime-100 mx-5 px-5 rounded-full" active-class="active-link">
+                        <img src="/icons/line-chart.svg" class="w-7 h-7 mr-3" />
+                        <span>Statistics</span>
+                    </router-link>
+                </div>
+                <div class="mb-2">
                     <router-link to="/quotes" class="flex items-center p-3 hover:bg-lime-100 mx-5 px-5 rounded-full" active-class="active-link">
                         <img src="/icons/bookmark.svg" class="w-7 h-7 mr-3" />
                         <span>Quotes</span>
                     </router-link>
-                </li>
-                <li>
+                </div>
+                <div>
                     <router-link to="/export" class="flex items-center p-3 hover:bg-lime-100 mx-5 px-5 rounded-full" active-class="active-link">
                         <img src="/icons/export.svg" class="w-7 h-7 mr-3" />
                         <span>Export</span>
                     </router-link>
-                </li>
-            </ul>
+                </div>
+            </div>
         </nav>
-        <nav class="flex flex-col items-center py-5">
-            <ul class="w-full flex flex-col">
-                <li class="mb-3">
-                    <router-link to="/about" class="flex items-center p-3 hover:bg-lime-100 mx-5 px-5 rounded-full" active-class="active-link">
-                        <span>About</span>
-                    </router-link>
-                </li>
-                <li class="mb-3">
-                    <router-link to="/terms" class="flex items-center p-3 hover:bg-lime-100 mx-5 px-5 rounded-full" active-class="active-link">
-                        <span>Terms & Condition</span>
-                    </router-link>
-                </li>
-                <li>
-                    <!-- <img src="/icons/user-avatar-filled.svg" class="w-7 h-7 mr-3" /> -->
-                    <!-- <span>Account</span> -->
+        <nav class="flex flex-col items-center">
+            <div class="w-full flex flex-row border-t justify-between items-center">
+                <div>
                     <AccountPopover />
-                </li>
-            </ul>
+                </div>
+                <div class="flex gap-1">
+                    <div class="hover:bg-lime-100 p-2 rounded-lg">
+                        <img src="/icons/help-line.svg" class="w-5 h-5" />
+                    </div>
+                    <div class="hover:bg-lime-100 p-2 rounded-lg">
+                        <img src="/icons/settings-outline.svg" class="w-5 h-5" />
+                    </div>
+                </div>
+                <div>
+                </div>
+
+            </div>
         </nav>
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 md:ml-[19vw] overflow-y-auto">
+    <main class="flex-1 md:ml-[250px] overflow-y-auto">
         <!-- Mobile Nav -->
         <div class="mobile-nav flex justify-between items-center p-4 shadow-md md:hidden">
             <img src="icons/logo.svg" class="h-12" />
@@ -94,16 +210,27 @@
 
 <script>
 import AccountPopover from '@/components/AccountPopover.vue';
+import Tooltip from '@/components/Tooltip.vue';
+import Popover from '@/components/Popover.vue';
+import Dialog from '@/components/Dialog.vue';
+import axios from 'axios';
 
 export default {
     components: {
-        AccountPopover
+        AccountPopover,
+        Tooltip,
+        Popover,
+        Dialog,
     },
     data() {
         return {
             isOpen: false,
             isMobile: false,
-            showBooks: false
+            showBooks: false,
+            showImportDialog: false,
+            fileName: '',
+            uploadProgress: 0,
+            cancelTokenSource: null,
         }
     },
     mounted() {
@@ -120,6 +247,45 @@ export default {
         toggleNav() {
             this.isOpen = !this.isOpen;
         },
+        handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                this.fileName = file.name;
+            } else {
+                this.fileName = '';
+            }
+        },
+        handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                this.fileName = file.name;
+            }
+        },
+        uploadFile() {
+            if (this.isUploading) return;
+
+            this.isUploading = true;
+            this.uploadProgress = 0;
+
+            this.uploadInterval = setInterval(() => {
+                if (this.uploadProgress < 100) {
+                    this.uploadProgress += 5;
+                } else {
+                    this.completeUpload();
+                }
+            }, 200);
+        },
+        cancelUpload() {
+            clearInterval(this.uploadInterval);
+            this.uploadProgress = 0;
+            this.isUploading = false;
+        },
+        completeUpload() {
+            clearInterval(this.uploadInterval);
+            this.isUploading = false;
+            // Here you would typically process the uploaded file
+            console.log('Upload complete');
+        }
     }
 }
 </script>
@@ -131,6 +297,7 @@ body {
 
 .active-link {
     /* border-left: 4px solid #A9D498; */
+
     background-color: #f0fdf4;
     /* Light green background for emphasis */
 }

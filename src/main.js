@@ -27,7 +27,7 @@ const routes = [
   {
     path: '/stats',
     name: 'Stats',
-    // component: () => import('./views/stats.vue')
+    component: () => import('./views/statistics.vue')
   },
   {
     path: '/export',

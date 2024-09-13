@@ -4,14 +4,13 @@
         <h1 class="text-3xl font-bold">All Books</h1>
         <div class="flex items-center space-x-4">
             <input type="number" v-model.number="booksPerPage" min="3" max="99" class="bg-white border border-gray-300 rounded px-2 py-1 w-20" />
-            <button @click="toggleView" class="bg-blue-500 text-white px-4 py-2 rounded">
-                Toggle {{ viewMode === 'grid' ? 'List' : 'Grid' }} View
-            </button>
+            <!-- <ListGridToggle :currentView="viewMode" /> -->
+            <ListGridToggle :current-view="viewMode" @view-change="handleViewModeChange" />
         </div>
     </div>
 
     <div class="flex justify-center">
-        <div :class="viewMode" class="grid gap-20 md:px-5" v-if="viewMode === 'grid'">
+        <div :class="viewMode" class="grid gap-10 md:px-5" v-if="viewMode === 'grid'">
             <div v-for="book in paginatedBooks" :key="book.id" class="border rounded-lg p-4 w-fit flex flex-col items-center justify-center cursor-pointer">
                 <img v-if="book.cover" :src="book.cover" alt="Book Cover" class="w-48 h-48 object-cover rounded-lg" />
                 <div v-if="!book.cover" class="w-48 h-48 border flex justify-center items-center cursor-pointer"></div>
@@ -64,7 +63,12 @@
 </template>
 
 <script>
+import ListGridToggle from '@/components/ListGridToggle.vue';
+
 export default {
+    components: {
+        ListGridToggle,
+    },
     data() {
         return {
             books: [{
@@ -164,8 +168,8 @@ export default {
         }
     },
     methods: {
-        toggleView() {
-            this.viewMode = this.viewMode === 'grid' ? 'list' : 'grid';
+        handleViewModeChange(newView) {
+            this.viewMode = newView;
         }
     }
 };
