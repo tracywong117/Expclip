@@ -76,7 +76,8 @@ export const dataProcessor = {
                 "Week": info[4],
                 "Datetime": info[5],
                 "Quote": info[6],
-                "Editable": false
+                "Editable": false,
+                "Color": "yellow",
             };
             records.push(record);
         }

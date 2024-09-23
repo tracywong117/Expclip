@@ -4,7 +4,7 @@
         <!-- Breadcrumb -->
         <ol class="flex space-x-2">
             <li>
-                <router-link to="/" class="text-lime-600 hover:underline">
+                <router-link to="/" class="text-customPurple-600 hover:underline">
                     Home
                 </router-link>
             </li>
@@ -15,7 +15,7 @@
         <!-- Search Bar -->
         <div class="flex items-center pr-8">
             <div class="relative w-full w-4xl max-w-xl">
-                <input type="text" placeholder="Search..." class="w-full p-[0.3rem] pl-10 border rounded-full focus:outline-none focus:ring-2 focus:ring-lime-300" />
+                <input type="text" placeholder="Search..." class="w-full p-[0.3rem] pl-10 border bg-transparent outline-none rounded-full focus:ring-2 focus:ring-purple-300" />
                 <img src="/icons/search.svg" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" alt="Search" />
             </div>
         </div>

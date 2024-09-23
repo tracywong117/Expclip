@@ -4,7 +4,7 @@
         <slot name="trigger"></slot>
     </div>
     <div v-if="isPopoverOpen" ref="popover" :class="[
-          'absolute w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50',
+          'absolute w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-1000',
           positionClass
         ]" :style="popoverStyle">
         <slot></slot>

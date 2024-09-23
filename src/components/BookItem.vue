@@ -1,5 +1,5 @@
 <template>
-    <div class="bg-white rounded-lg border p-4 flex items-center space-x-4 mb-4 hover:bg-lime-100 cursor-pointer">
+    <div class="bg-white rounded-lg border p-4 flex items-center space-x-4 mb-4 hover:bg-gray-50 cursor-pointer">
       <img :src="book.image" alt="Book Cover" class="w-20 h-20 rounded-lg" />
       <div class="flex-1">
         <h3 class="text-lg font-semibold mb-1">{{ book.title }}</h3>

@@ -1,6 +1,6 @@
 <template>
   <div class="relative flex text-left text-[14px]" ref="container">
-    <button @click.stop="togglePopover" class="flex items-center p-2 hover:bg-lime-100 mx-2 my-3 px-5 rounded-lg transition-timing">
+    <button @click.stop="togglePopover" class="flex items-center p-2 hover:bg-customPurple-200 mx-2 my-3 px-5 rounded-lg transition-timing">
       <img src="/icons/user-avatar-filled.svg" class="w-6 h-6 mr-2" />
       <span>Tracy Wong</span>
     </button>

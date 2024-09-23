@@ -3,15 +3,14 @@
     <div class="flex justify-between items-center mb-4">
         <h1 class="text-3xl font-bold">All Books</h1>
         <div class="flex items-center space-x-4">
-            <input type="number" v-model.number="booksPerPage" min="3" max="99" class="bg-white border border-gray-300 rounded px-2 py-1 w-20" />
-            <!-- <ListGridToggle :currentView="viewMode" /> -->
+            <input type="number" v-model.number="booksPerPage" min="3" max="99" class="bg-white border border-gray-300 rounded px-2 py-1 w-20 outline-none" />
             <ListGridToggle :current-view="viewMode" @view-change="handleViewModeChange" />
         </div>
     </div>
 
     <div class="flex justify-center">
-        <div :class="viewMode" class="grid gap-10 md:px-5" v-if="viewMode === 'grid'">
-            <div v-for="book in paginatedBooks" :key="book.id" class="border rounded-lg p-4 w-fit flex flex-col items-center justify-center cursor-pointer">
+        <div :class="viewMode" class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10 md:px-5" v-if="viewMode === 'grid'">
+            <div v-for="book in paginatedBooks" :key="book.id" class="rounded-lg p-4 w-fit flex flex-col items-center justify-center cursor-pointer">
                 <img v-if="book.cover" :src="book.cover" alt="Book Cover" class="w-48 h-48 object-cover rounded-lg" />
                 <div v-if="!book.cover" class="w-48 h-48 border flex justify-center items-center cursor-pointer"></div>
                 <h3 class="text-lg font-semibold my-1">{{ book.title }}</h3>
@@ -27,7 +26,7 @@
     </div>
 
     <div :class="viewMode" class="grid gap-6" v-if="viewMode === 'list'">
-        <div v-for="book in paginatedBooks" :key="book.id" class="rounded-lg p-4 w-full hover:bg-lime-100 cursor-pointer flex justify-between items-center">
+        <div v-for="book in paginatedBooks" :key="book.id" class="rounded-lg p-4 w-full cursor-pointer flex justify-between items-center">
             <div class="flex">
                 <img v-if="book.cover" :src="book.cover" alt="Book Cover" class="w-48 h-48 object-cover rounded-lg" />
                 <div v-if="!book.cover" class="w-48 h-48 border flex justify-center items-center cursor-pointer"></div>
@@ -55,7 +54,7 @@
     </div>
 
     <div class="flex justify-center mt-6">
-        <button v-for="page in totalPages" :key="page" @click="currentPage = page" :class="['px-3 py-1 mx-1 rounded', { 'bg-blue-500 text-white': currentPage === page, 'bg-gray-200': currentPage !== page }]">
+        <button v-for="page in totalPages" :key="page" @click="currentPage = page" :class="['px-3 py-1 mx-1 rounded', { 'bg-customPurple-600 text-white': currentPage === page, 'bg-gray-200': currentPage !== page }]">
             {{ page }}
         </button>
     </div>
@@ -178,9 +177,9 @@ export default {
 <style scoped>
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
 
-.grid {
+/* .grid {
     grid-template-columns: repeat(4, 1fr);
-}
+} */
 
 .list {
     grid-template-columns: 1fr;
