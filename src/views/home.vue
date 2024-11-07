@@ -4,21 +4,21 @@
         <!-- Breadcrumb -->
         <ol class="flex space-x-2">
             <li>
-                <router-link to="/" class="text-customPurple-600 hover:underline">
+                <div class="text-customPurple-600">
                     Home
-                </router-link>
+                </div>
             </li>
             <li>
                 <span class="text-gray-500">/</span>
             </li>
         </ol>
         <!-- Search Bar -->
-        <div class="flex items-center pr-8">
+        <!-- <div class="flex items-center pr-8">
             <div class="relative w-full w-4xl max-w-xl">
                 <input type="text" placeholder="Search..." class="w-full p-[0.3rem] pl-10 border bg-transparent outline-none rounded-full focus:ring-2 focus:ring-purple-300" />
                 <img src="/icons/search.svg" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" alt="Search" />
             </div>
-        </div>
+        </div> -->
     </nav>
 
     <div class="container mx-auto p-4">
@@ -44,11 +44,11 @@
                 </div>
                 <div class="flex-1 flex flex-col items-center justify-center p-6 rounded-lg">
                     <p class="text-sm">The books you have READ ...</p>
-                    <p class="text-4xl leading-tight">20</p>
+                    <p class="text-4xl leading-tight">{{ stats.booksRead }}</p>
                 </div>
                 <div class="flex-1 flex flex-col items-center justify-center p-6 rounded-lg">
                     <p class="text-sm">The quotes you have MADE ...</p>
-                    <p class="text-4xl leading-tight">100</p>
+                    <p class="text-4xl leading-tight">{{ stats.quotesMade }}</p>
                 </div>
             </div>
 
@@ -69,9 +69,9 @@
 
                 </div>
                 <div>
-                    It takes a great deal of bravery to stand up to our enemies, but just as much to stand up to our friends
+                    {{ todayQuote.text }}
                 </div>
-                <span class="text-sm text-right">- J.K. Rowling</span>
+                <span class="text-sm text-right">- {{ todayQuote.author }}</span>
             </div>
 
             <div class="px-10 py-8 rounded-lg border h-full">
@@ -134,24 +134,35 @@ export default {
     data() {
         return {
             books: [{
+                    id: '',
                     image: 'images/harry-potter-1.jpg',
                     title: 'Harry Potter and the Sorcerer\'s Stone',
                     author: 'J.K. Rowling',
                     stars: 5,
                 },
-                {
+                {   
+                    id: '',
                     image: 'images/harry-potter-2.jpg',
                     title: 'Harry Potter and the Chamber of Secrets',
                     author: 'J.K. Rowling',
                     stars: 3,
                 },
                 {
+                    id: '',
                     image: 'images/harry-potter-3.jpg',
                     title: 'Harry Potter and the Prisoner of Azkaban',
                     author: 'J.K. Rowling',
                     stars: 5,
                 }
-            ]
+            ],
+            stats: {
+                booksRead: 20,
+                quotesMade: 100
+            },
+            todayQuote: {
+                text: 'It takes a great deal of bravery to stand up to our enemies, but just as much to stand up to our friends.',
+                author: 'J.K. Rowling'
+            }
 
         };
     }

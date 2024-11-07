@@ -1,7 +1,22 @@
 <template>
 <div class="container mx-auto p-4">
     <div class="flex justify-between items-center mb-4">
-        <h1 class="text-3xl font-bold">All Books</h1>
+        <!-- <h1 class="text-3xl font-bold">All Books</h1> -->
+        <ol class="flex space-x-2">
+            <li class="text-customPurple-600">
+                Books
+            </li>
+            <li>
+                <span class="text-gray-500">/</span>
+            </li>
+            <li>
+                <!-- <span class="text-gray-500">All</span> -->
+                <select v-model="sortOrder" @change="sortQuotes" class="border rounded px-2">
+                    <option value="asc">All</option>
+                    <option v-for="(item, index) in tags" :key="index">{{ item }}</option>
+                </select>
+            </li>
+        </ol>
         <div class="flex items-center space-x-4">
             <input type="number" v-model.number="booksPerPage" min="3" max="99" class="bg-white border border-gray-300 rounded px-2 py-1 w-20 outline-none" />
             <ListGridToggle :current-view="viewMode" @view-change="handleViewModeChange" />
@@ -150,6 +165,19 @@ export default {
                     tags: ['Dystopian', 'Science Fiction'],
                     stars: 4
                 }
+            ],
+            tags: [
+                'Classic',
+                'Novel',
+                'Drama',
+                'Dystopian',
+                'Science Fiction',
+                'Romance',
+                'Coming-of-Age',
+                'Adventure',
+                'Historical',
+                'Epic',
+                'Psychological',
             ],
             currentPage: 1,
             booksPerPage: 8,

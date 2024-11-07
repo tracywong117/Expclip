@@ -10,7 +10,7 @@
                 <Popover position="bottom">
                     <template #trigger>
                         <Tooltip position="bottom" autoHideDelay=0>
-                            <button class="flex p-2 bg-customPurple-100 border hover:bg-customPurple-300 transition-colors duration-200 stroke-customPurple-700 border-customPurple-200">
+                            <button class="rounded-full flex p-2 bg-customPurple-200 hover:bg-customPurple-400 transition-colors duration-200 stroke-customPurple-900">
                                 <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -31,13 +31,24 @@
                     </div>
                 </Popover>
                 <Tooltip position="bottom" autoHideDelay=0>
-                    <button class="flex p-2 bg-customPurple-100 border hover:bg-customPurple-300 transition-colors duration-200 stroke-customPurple-700 border-customPurple-200" @click="showImportDialog=!showImportDialog">
+                    <button class="rounded-full flex p-2 bg-customPurple-200 hover:bg-customPurple-400 transition-colors duration-200 stroke-customPurple-900" @click="showImportDialog=!showImportDialog">
                         <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                     </button>
                     <template #content>
                         Add new
+                    </template>
+                </Tooltip>
+                <Tooltip position="bottom" autoHideDelay=0>
+                    <button class="rounded-full flex p-2 bg-customPurple-200 hover:bg-customPurple-400 transition-colors duration-200 stroke-customPurple-900" @click="showImportDialog=!showImportDialog">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M8.5 3c3.0375661 0 5.5 2.46243388 5.5 5.5 0 1.3387897-.4783412 2.5658568-1.2734386 3.5196163l4.126992 4.1268303c.1952621.1952622.1952621.5118446 0 .7071068-.1735664.1735663-.4429908.1928515-.6378589.0578554l-.0692479-.0578554-4.1268303-4.126992c-.9537595.7950974-2.1808266 1.2734386-3.5196163 1.2734386-3.03756612 0-5.5-2.4624339-5.5-5.5 0-3.03756612 2.46243388-5.5 5.5-5.5zm0 1c-2.48528137 0-4.5 2.01471863-4.5 4.5 0 2.4852814 2.01471863 4.5 4.5 4.5 2.4852814 0 4.5-2.0147186 4.5-4.5 0-2.48528137-2.0147186-4.5-4.5-4.5z" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" fill="#212121" />
+                        </svg>
+
+                    </button>
+                    <template #content>
+                        Search
                     </template>
                 </Tooltip>
 
