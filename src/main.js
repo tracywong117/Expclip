@@ -5,7 +5,7 @@ import App from './App.vue'
 import './index.css'
 // import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 
-import {createRouter, createWebHashHistory} from 'vue-router'
+import {createRouter, createWebHistory} from 'vue-router'
 import component from 'element-plus/es/components/tree-select/src/tree-select-option.mjs'
 
 const routes = [
@@ -18,6 +18,12 @@ const routes = [
     path: '/books',
     name: 'Books',
     component: () => import('./views/books.vue')
+  },
+  {
+    path: '/books/:title',
+    name: 'BookInstance',
+    component: () => import('./views/bookInstance.vue'), // Ensure this component exists
+    props: true
   },
   {
     path: '/quotes',
@@ -39,11 +45,10 @@ const routes = [
     name: 'About',
     // component: () => import('./views/about.vue')
   }
-
-]
+];
  
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   routes,
 })
  

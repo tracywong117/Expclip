@@ -1,11 +1,11 @@
 <template>
-  <div class="inline-flex bg-gray-200 rounded-full p-0.5 shadow-sm">
+  <div class="inline-flex bg-gray-200 rounded-full w-30 shadow-sm ">
     <button 
       @click="$emit('view-change', 'list')" 
       :class="[
         'flex items-center justify-center px-3 py-1.5 rounded-full transition-all duration-200 ease-in-out text-sm',
         currentView === 'list' 
-          ? 'bg-customPurple-500 text-white' 
+          ? 'bg-customPurple-600 text-white' 
           : 'hover:bg-customPurple-100 text-customPurple-700'
       ]"
     >
@@ -19,7 +19,7 @@
       :class="[
         'flex items-center justify-center px-3 py-1.5 rounded-full transition-all duration-200 ease-in-out text-sm',
         currentView === 'grid' 
-          ? 'bg-customPurple-500 text-white' 
+          ? 'bg-customPurple-600 text-white' 
           : 'hover:bg-customPurple-100 text-customPurple-700'
       ]"
     >

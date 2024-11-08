@@ -2,7 +2,7 @@
 <div>
     <nav class="flex my-2 mx-4 w-full justify-between items-center">
         <!-- Breadcrumb -->
-        <ol class="flex space-x-2">
+        <!-- <ol class="flex space-x-2">
             <li>
                 <div class="text-customPurple-600">
                     Home
@@ -11,7 +11,7 @@
             <li>
                 <span class="text-gray-500">/</span>
             </li>
-        </ol>
+        </ol> -->
         <!-- Search Bar -->
         <!-- <div class="flex items-center pr-8">
             <div class="relative w-full w-4xl max-w-xl">
