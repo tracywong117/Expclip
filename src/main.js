@@ -1,5 +1,6 @@
 import 'element-plus/dist/index.css'
 import { createApp } from 'vue'
+import { createPinia } from 'pinia'
 import App from './App.vue'
 
 import './index.css'
@@ -20,7 +21,7 @@ const routes = [
     component: () => import('./views/books.vue')
   },
   {
-    path: '/books/:title',
+    path: '/books/:id',
     name: 'BookInstance',
     component: () => import('./views/bookInstance.vue'), // Ensure this component exists
     props: true
@@ -53,6 +54,9 @@ const router = createRouter({
 })
  
 const app = createApp(App)
+const pinia = createPinia()
+
+app.use(pinia)
 app.use(router)
 app.mount('#app')
 

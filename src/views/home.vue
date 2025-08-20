@@ -122,49 +122,96 @@
 </div>
 </template>
 
-<script>
-import BookItem from '@/components/BookItem.vue';
-import ViewAll from '@/components/ViewAll.vue';
+<script setup>
+import { computed, onMounted } from 'vue'
+import { useBooksStore, useQuotesStore } from '@/stores'
+import BookItem from '@/components/BookItem.vue'
+import ViewAll from '@/components/ViewAll.vue'
 
-export default {
-    components: {
-        BookItem,
-        ViewAll
-    },
-    data() {
+// Initialize stores
+const booksStore = useBooksStore()
+const quotesStore = useQuotesStore()
+
+// Computed properties from stores
+const books = computed(() => booksStore.favoriteBooks.slice(0, 3))
+const stats = computed(() => ({
+    booksRead: booksStore.bookCount,
+    quotesMade: quotesStore.quoteCount
+}))
+
+const todayQuote = computed(() => {
+    const recentQuotes = quotesStore.recentQuotes
+    if (recentQuotes.length > 0) {
+        // Get a random quote from recent quotes for "today's quote"
+        const randomIndex = Math.floor(Math.random() * recentQuotes.length)
+        const quote = recentQuotes[randomIndex]
+        const book = booksStore.getBookById(quote.bookId)
         return {
-            books: [{
-                    id: '',
-                    image: 'images/harry-potter-1.jpg',
-                    title: 'Harry Potter and the Sorcerer\'s Stone',
-                    author: 'J.K. Rowling',
-                    stars: 5,
-                },
-                {   
-                    id: '',
-                    image: 'images/harry-potter-2.jpg',
-                    title: 'Harry Potter and the Chamber of Secrets',
-                    author: 'J.K. Rowling',
-                    stars: 3,
-                },
-                {
-                    id: '',
-                    image: 'images/harry-potter-3.jpg',
-                    title: 'Harry Potter and the Prisoner of Azkaban',
-                    author: 'J.K. Rowling',
-                    stars: 5,
-                }
-            ],
-            stats: {
-                booksRead: 20,
-                quotesMade: 100
-            },
-            todayQuote: {
-                text: 'It takes a great deal of bravery to stand up to our enemies, but just as much to stand up to our friends.',
-                author: 'J.K. Rowling'
-            }
-
-        };
+            text: quote.text,
+            author: book?.author || 'Unknown Author'
+        }
     }
-}
+    
+    // Fallback quote if no quotes exist
+    return {
+        text: 'It takes a great deal of bravery to stand up to our enemies, but just as much to stand up to our friends.',
+        author: 'J.K. Rowling'
+    }
+})
+
+// Initialize with some sample data if stores are empty
+onMounted(() => {
+    if (booksStore.bookCount === 0) {
+        // Add some sample books
+        const book1 = booksStore.addBook({
+            title: 'Harry Potter and the Sorcerer\'s Stone',
+            author: 'J.K. Rowling',
+            stars: 5,
+            image: 'images/harry-potter-1.jpg',
+            isFavorite: true,
+            tags: ['fantasy', 'young-adult']
+        })
+        const book2 = booksStore.addBook({
+            title: 'Harry Potter and the Chamber of Secrets',
+            author: 'J.K. Rowling',
+            stars: 3,
+            image: 'images/harry-potter-2.jpg',
+            isFavorite: true,
+            tags: ['fantasy', 'young-adult']
+        })
+        const book3 = booksStore.addBook({
+            title: 'Harry Potter and the Prisoner of Azkaban',
+            author: 'J.K. Rowling',
+            stars: 5,
+            image: 'images/harry-potter-3.jpg',
+            isFavorite: true,
+            tags: ['fantasy', 'young-adult']
+        })
+
+        // Add some sample quotes linked to books
+        if (quotesStore.quoteCount === 0) {
+            const quote1 = quotesStore.addQuote({
+                text: 'It takes a great deal of bravery to stand up to our enemies, but just as much to stand up to our friends.',
+                bookTitle: book1.title,
+                bookId: book1.id,
+                author: book1.author,
+                tags: ['wisdom', 'courage'],
+                color: 'yellow'
+            })
+            
+            const quote2 = quotesStore.addQuote({
+                text: 'It is our choices, Harry, that show what we truly are, far more than our abilities.',
+                bookTitle: book2.title,
+                bookId: book2.id,
+                author: book2.author,
+                tags: ['choices', 'character'],
+                color: 'blue'
+            })
+
+            // Link quotes to books
+            booksStore.addQuoteToBook(book1.id, quote1.id)
+            booksStore.addQuoteToBook(book2.id, quote2.id)
+        }
+    }
+})
 </script>

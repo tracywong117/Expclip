@@ -1,183 +1,208 @@
 <template>
-<div class="relative inline-block" ref="container">
-    <div @click.stop="togglePopover">
-        <slot name="trigger"></slot>
-    </div>
-    <div v-if="isPopoverOpen" ref="popover" :class="[
-          'absolute w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-1000',
-          positionClass
-        ]" :style="popoverStyle">
-        <slot></slot>
-    </div>
-</div>
+  <component :is="inline ? 'span' : 'div'" class="popover-wrapper" ref="container">
+    <component 
+      :is="inline ? 'span' : 'div'" 
+      class="popover-trigger" 
+      @click.stop="togglePopover"
+    >
+      <slot name="trigger"></slot>
+    </component>
+    
+    <Teleport to="body">
+      <div 
+        v-if="isPopoverOpen" 
+        ref="popover"
+        class="popover-content"
+        :style="popoverStyle"
+        @click.stop
+      >
+        <div class="popover-inner">
+          <slot></slot>
+        </div>
+      </div>
+    </Teleport>
+  </component>
 </template>
 
-  
-  
 <script>
-import {
-    ref,
-    computed,
-    onMounted,
-    onBeforeUnmount,
-    nextTick,
-    reactive
-} from 'vue';
+import { ref, onMounted, onBeforeUnmount, nextTick, watch } from 'vue';
 
 export default {
-    name: 'Popover',
-    props: {
-        position: {
-            type: String,
-            default: 'bottom',
-            validator: (value) => ['top', 'bottom', 'left', 'right'].includes(value)
+  name: 'Popover',
+  props: {
+    position: {
+      type: String,
+      default: 'bottom',
+      validator: (value) => ['top', 'bottom', 'left', 'right', 'auto'].includes(value)
+    },
+    offset: {
+      type: Number,
+      default: 8
+    },
+    inline: {
+      type: Boolean,
+      default: true
+    }
+  },
+  setup(props) {
+    const isPopoverOpen = ref(false);
+    const container = ref(null);
+    const popover = ref(null);
+    const popoverStyle = ref({});
+
+    const togglePopover = () => {
+      isPopoverOpen.value = !isPopoverOpen.value;
+    };
+
+    const calculatePosition = () => {
+      if (!container.value || !popover.value) return;
+
+      const triggerRect = container.value.getBoundingClientRect();
+      const popoverRect = popover.value.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const scrollY = window.scrollY;
+      const scrollX = window.scrollX;
+
+      let position = props.position;
+      let top = 0;
+      let left = 0;
+
+      // Auto positioning - find best position
+      if (position === 'auto') {
+        const spaceAbove = triggerRect.top;
+        const spaceBelow = viewportHeight - triggerRect.bottom;
+        const spaceLeft = triggerRect.left;
+        const spaceRight = viewportWidth - triggerRect.right;
+
+        if (spaceBelow >= popoverRect.height || spaceBelow > spaceAbove) {
+          position = 'bottom';
+        } else if (spaceAbove >= popoverRect.height) {
+          position = 'top';
+        } else if (spaceRight >= popoverRect.width) {
+          position = 'right';
+        } else if (spaceLeft >= popoverRect.width) {
+          position = 'left';
+        } else {
+          position = 'bottom'; // fallback
         }
-    },
-    setup(props) {
-        const isPopoverOpen = ref(false);
-        const container = ref(null);
-        const popover = ref(null);
-        const popoverStyle = reactive({
-            transform: '',
-            top: '',
-            left: '',
-            right: '',
-            bottom: ''
-        });
+      }
 
-        const togglePopover = () => {
-            isPopoverOpen.value = !isPopoverOpen.value;
-            if (isPopoverOpen.value) {
-                nextTick(() => {
-                    // Add a small delay to ensure content is rendered
-                    setTimeout(adjustPopoverPosition, 0);
-                });
-            }
-        };
+      // Calculate base position
+      switch (position) {
+        case 'top':
+          top = triggerRect.top - popoverRect.height - props.offset + scrollY;
+          left = triggerRect.left + (triggerRect.width - popoverRect.width) / 2 + scrollX;
+          break;
+        case 'bottom':
+          top = triggerRect.bottom + props.offset + scrollY;
+          left = triggerRect.left + (triggerRect.width - popoverRect.width) / 2 + scrollX;
+          break;
+        case 'left':
+          top = triggerRect.top + (triggerRect.height - popoverRect.height) / 2 + scrollY;
+          left = triggerRect.left - popoverRect.width - props.offset + scrollX;
+          break;
+        case 'right':
+          top = triggerRect.top + (triggerRect.height - popoverRect.height) / 2 + scrollY;
+          left = triggerRect.right + props.offset + scrollX;
+          break;
+      }
 
-        const handleClickOutside = (event) => {
-            if (container.value && !container.value.contains(event.target)) {
-                isPopoverOpen.value = false;
-            }
-        };
+      // Adjust for viewport boundaries
+      if (left < 0) {
+        left = props.offset;
+      } else if (left + popoverRect.width > viewportWidth) {
+        left = viewportWidth - popoverRect.width - props.offset;
+      }
 
-        const positionClass = computed(() => {
-            switch (props.position) {
-                case 'top':
-                    return 'bottom-full left-1/2 transform -translate-x-1/2 mb-2';
-                case 'bottom':
-                    return 'top-full left-2 transform -translate-x-1/2 mt-2';
-                case 'left':
-                    return 'right-full top-1/2 transform -translate-y-1/2 mr-2';
-                case 'right':
-                    return 'left-full top-1/2 transform -translate-y-1/2 ml-2';
-                default:
-                    return 'top-full left-1/2 transform -translate-x-1/2 mt-2';
-            }
-        });
+      if (top < scrollY) {
+        top = scrollY + props.offset;
+      } else if (top + popoverRect.height > viewportHeight + scrollY) {
+        top = viewportHeight + scrollY - popoverRect.height - props.offset;
+      }
 
-        const adjustPopoverPosition = () => {
-            if (!popover.value || !container.value) return;
+      popoverStyle.value = {
+        position: 'absolute',
+        top: `${top}px`,
+        left: `${left}px`,
+        zIndex: 9999
+      };
+    };
 
-            // Reset styles before recalculating
-            Object.assign(popoverStyle, {
-                transform: '',
-                top: '',
-                left: '',
-                right: '',
-                bottom: ''
-            });
+    const handleClickOutside = (event) => {
+      if (container.value && !container.value.contains(event.target) && 
+          popover.value && !popover.value.contains(event.target)) {
+        isPopoverOpen.value = false;
+      }
+    };
 
-            nextTick(() => {
-                const containerRect = container.value.getBoundingClientRect();
-                const popoverRect = popover.value.getBoundingClientRect();
-                const viewportWidth = window.innerWidth;
-                const viewportHeight = window.innerHeight;
+    const handleScroll = () => {
+      if (isPopoverOpen.value) {
+        calculatePosition();
+      }
+    };
 
-                let adjustedPosition = props.position;
-                let adjustment = {
-                    x: 0,
-                    y: 0
-                };
+    const handleResize = () => {
+      if (isPopoverOpen.value) {
+        calculatePosition();
+      }
+    };
 
-                // Check if the popover exceeds the viewport boundaries and adjust if necessary
-                if (props.position === 'bottom' && popoverRect.bottom > viewportHeight) {
-                    adjustedPosition = 'top';
-                } else if (props.position === 'top' && popoverRect.top < 0) {
-                    adjustedPosition = 'bottom';
-                } else if (props.position === 'left' && popoverRect.left < 0) {
-                    adjustedPosition = 'right';
-                } else if (props.position === 'right' && popoverRect.right > viewportWidth) {
-                    adjustedPosition = 'left';
-                }
+    watch(isPopoverOpen, async (newValue) => {
+      if (newValue) {
+        await nextTick();
+        calculatePosition();
+      }
+    });
 
-                // Calculate adjustments for horizontal overflow
-                if (['top', 'bottom'].includes(adjustedPosition)) {
-                    if (popoverRect.left < 0) {
-                        adjustment.x = -popoverRect.left;
-                    } else if (popoverRect.right > viewportWidth) {
-                        adjustment.x = viewportWidth - popoverRect.right;
-                    }
-                }
+    onMounted(() => {
+      document.addEventListener('click', handleClickOutside);
+      window.addEventListener('scroll', handleScroll, true);
+      window.addEventListener('resize', handleResize);
+    });
 
-                // Calculate adjustments for vertical overflow
-                if (['left', 'right'].includes(adjustedPosition)) {
-                    if (popoverRect.top < 0) {
-                        adjustment.y = -popoverRect.top;
-                    } else if (popoverRect.bottom > viewportHeight) {
-                        adjustment.y = viewportHeight - popoverRect.bottom;
-                    }
-                }
+    onBeforeUnmount(() => {
+      document.removeEventListener('click', handleClickOutside);
+      window.removeEventListener('scroll', handleScroll, true);
+      window.removeEventListener('resize', handleResize);
+    });
 
-                // Apply the adjustments
-                popoverStyle.transform = `translate(${adjustment.x}px, ${adjustment.y}px)`;
-
-                // Set the position based on the adjusted position
-                switch (adjustedPosition) {
-                    case 'top':
-                        popoverStyle.bottom = `${containerRect.height}px`;
-                        popoverStyle.left = '50%';
-                        popoverStyle.transform += ' translate(-50%, 0)';
-                        break;
-                    case 'bottom':
-                        popoverStyle.top = `${containerRect.height}px`;
-                        popoverStyle.left = '50%';
-                        popoverStyle.transform += ' translate(-50%, 0)';
-                        break;
-                    case 'left':
-                        popoverStyle.right = `${containerRect.width}px`;
-                        popoverStyle.top = '50%';
-                        popoverStyle.transform += ' translate(0, -50%)';
-                        break;
-                    case 'right':
-                        popoverStyle.left = `${containerRect.width}px`;
-                        popoverStyle.top = '50%';
-                        popoverStyle.transform += ' translate(0, -50%)';
-                        break;
-                }
-            });
-        };
-
-        onMounted(() => {
-            document.addEventListener('click', handleClickOutside);
-            window.addEventListener('resize', adjustPopoverPosition);
-            window.addEventListener('scroll', adjustPopoverPosition);
-        });
-
-        onBeforeUnmount(() => {
-            document.removeEventListener('click', handleClickOutside);
-            window.removeEventListener('resize', adjustPopoverPosition);
-            window.removeEventListener('scroll', adjustPopoverPosition);
-        });
-
-        return {
-            isPopoverOpen,
-            container,
-            popover,
-            togglePopover,
-            positionClass,
-            popoverStyle
-        };
-    },
+    return {
+      isPopoverOpen,
+      container,
+      popover,
+      togglePopover,
+      popoverStyle
+    };
+  }
 };
 </script>
+
+<style scoped>
+.popover-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.popover-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.popover-content {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 10px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  min-width: 200px;
+  max-width: 320px;
+}
+
+.popover-inner {
+  padding: 12px;
+}
+</style>

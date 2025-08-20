@@ -1,23 +1,31 @@
 <template>
-    <div v-if="show" @click.self="closeModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
-      <div class="bg-white m-15 p-5 rounded-lg shadow-xl max-w-[50vw]">
+  <Teleport to="body">
+    <div
+      v-if="show"
+      @click.self="closeModal"
+      class="fixed inset-0 bg-gray-700 bg-opacity-60 flex items-center justify-center z-[9999]"
+    >
+      <div
+        class="bg-white rounded-lg shadow-2xl max-w-[90vw] w-full sm:max-w-lg p-6 relative z-[10000]"
+      >
         <slot></slot>
       </div>
     </div>
-  </template>
-  
-  <script>
-  export default {
-    props: {
-      show: {
-        type: Boolean,
-        required: true
-      }
-    },
-    methods: {
-      closeModal() {
-        this.$emit('update:show', false);
-      }
+  </Teleport>
+</template>
+
+<script>
+export default {
+  props: {
+    show: {
+      type: Boolean,
+      required: true
+    }
+  },
+  methods: {
+    closeModal() {
+      this.$emit('update:show', false);
     }
   }
-  </script>
+}
+</script>

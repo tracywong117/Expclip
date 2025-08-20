@@ -37,7 +37,7 @@
                         </svg>
                     </button>
                     <template #content>
-                        Add new
+                        Import from My Clippings.txt
                     </template>
                 </Tooltip>
                 <Tooltip position="bottom" autoHideDelay=0>
@@ -53,39 +53,41 @@
                 </Tooltip>
 
                 <Dialog v-model:show="showImportDialog">
-                    <div class="text-xl font-semibold mb-3">Import Highlights from Kindle</div>
-                    <div class="text-md text-gray-500 mb-3">
-                        Kindle Clippings is the file that contains all the highlights and notes you've made on your Kindle device. You can import this file to get all your highlights and notes in one place.
-                    </div>
-                    <label class="border-dashed border-2 border-gray-300 p-10 text-center cursor-pointer hover:border-gray-400 transition block w-[50%] mx-auto">
-                        <div class="flex flex-col items-center">
-                            <img src="icons/file-text.svg" class="w-10 h-10 mb-2" alt="File icon" />
-                            <p v-if="!fileName" class="text-lg">
-                                Drop <em class="text-customPurple-600">My Clipping.txt</em> here
-                            </p>
-                            <p v-else class="text-lg">
-                                Selected file: <em class="text-customPurple-600">{{ fileName }}</em>
-                            </p>
+                    <div class="">
+                        <div class="text-xl font-semibold mb-3">Import Highlights from Kindle</div>
+                        <div class="text-md text-gray-500 mb-3">
+                            Kindle Clippings is the file that contains all the highlights and notes you've made on your Kindle device. You can import this file to get all your highlights and notes in one place.
                         </div>
-                        <input type="file" class="hidden" accept=".txt" @change="handleFileUpload" />
-                    </label>
-
-                    <!-- Progress bar -->
-                    <div v-if="uploadProgress > 0" class="mt-5 w-[50%] mx-auto">
-                        <div class="bg-gray-200 rounded-full h-2.5">
-                            <div class="bg-lime-500 h-2.5 rounded-full" :style="{ width: uploadProgress + '%' }"></div>
+                        <label class="border-dashed border-2 border-gray-300 p-10 text-center cursor-pointer hover:border-gray-400 transition block w-[50%] mx-auto">
+                            <div class="flex flex-col items-center">
+                                <img src="icons/file-text.svg" class="w-10 h-10 mb-2" alt="File icon" />
+                                <p v-if="!fileName" class="text-lg">
+                                    Drop <em class="text-customPurple-600">My Clipping.txt</em> here
+                                </p>
+                                <p v-else class="text-lg">
+                                    Selected file: <em class="text-customPurple-600">{{ fileName }}</em>
+                                </p>
+                            </div>
+                            <input type="file" class="hidden" accept=".txt" @change="handleFileUpload" />
+                        </label>
+    
+                        <!-- Progress bar -->
+                        <div v-if="uploadProgress > 0" class="mt-5 w-[50%] mx-auto">
+                            <div class="bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-lime-500 h-2.5 rounded-full" :style="{ width: uploadProgress + '%' }"></div>
+                            </div>
+                            <p class="text-center mt-2 text-sm text-gray-500">{{ uploadProgress }}% uploaded</p>
                         </div>
-                        <p class="text-center mt-2 text-sm text-gray-500">{{ uploadProgress }}% uploaded</p>
-                    </div>
-
-                    <!-- Upload and Cancel buttons -->
-                    <div class="flex justify-center mt-5 space-x-4">
-                        <button v-if="!isUploading" @click="uploadFile" class="bg-green-200 text-green-800 hover:bg-green-400 hover:text-green-900 px-10 py-2 rounded-lg transition-colors">
-                            Upload
-                        </button>
-                        <button v-if="isUploading" @click="cancelUpload" class="bg-red-200 text-red-800 hover:bg-red-400 hover:text-red-900 px-10 py-2 rounded-lg transition-colors">
-                            Cancel
-                        </button>
+    
+                        <!-- Upload and Cancel buttons -->
+                        <div class="flex justify-center mt-5 space-x-4">
+                            <button v-if="!isUploading" @click="uploadFile" class="bg-green-200 text-green-800 hover:bg-green-400 hover:text-green-900 px-10 py-2 rounded-lg transition-colors">
+                                Upload
+                            </button>
+                            <button v-if="isUploading" @click="cancelUpload" class="bg-red-200 text-red-800 hover:bg-red-400 hover:text-red-900 px-10 py-2 rounded-lg transition-colors">
+                                Cancel
+                            </button>
+                        </div>
                     </div>
                 </Dialog>
             </div>
@@ -98,7 +100,7 @@
                 </div>
             </div>
         </nav>
-        <nav class="flex flex-col items-center">
+        <nav class="flex flex-col items-center h-[70px]">
             <div class="w-full flex flex-row border-t justify-between items-center">
                 <div>
                     <AccountPopover />
@@ -158,112 +160,137 @@
 </div>
 </template>
 
-<script>
-import AccountPopover from '@/components/AccountPopover.vue';
-import Tooltip from '@/components/Tooltip.vue';
-import Popover from '@/components/Popover.vue';
-import Dialog from '@/components/Dialog.vue';
-import axios from 'axios';
+<script setup>
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { useDataProcessorStore } from '@/stores'
+import AccountPopover from '@/components/AccountPopover.vue'
+import Tooltip from '@/components/Tooltip.vue'
+import Popover from '@/components/Popover.vue'
+import Dialog from '@/components/Dialog.vue'
 
-export default {
-    components: {
-        AccountPopover,
-        Tooltip,
-        Popover,
-        Dialog,
-    },
-    data() {
-        return {
-            navItems: [{
-                    to: '/',
-                    label: 'Home',
-                    icon: '/icons/house.svg'
-                },
-                {
-                    to: '/books',
-                    label: 'Books',
-                    icon: '/icons/book.svg'
-                },
-                {
-                    to: '/stats',
-                    label: 'Statistics',
-                    icon: '/icons/line-chart.svg'
-                },
-                {
-                    to: '/quotes',
-                    label: 'Quotes',
-                    icon: '/icons/bookmark.svg'
-                },
-                {
-                    to: '/export',
-                    label: 'Export',
-                    icon: '/icons/export.svg'
-                }
-            ],
-            isOpen: false,
-            isMobile: false,
-            showBooks: false,
-            showImportDialog: false,
-            fileName: '',
-            uploadProgress: 0,
-            cancelTokenSource: null,
-        }
-    },
-    mounted() {
-        this.checkMobile();
-        window.addEventListener('resize', this.checkMobile);
-    },
-    beforeDestroy() {
-        window.removeEventListener('resize', this.checkMobile);
-    },
-    methods: {
-        checkMobile() {
-            this.isMobile = window.innerWidth < 900;
-        },
-        toggleNav() {
-            this.isOpen = !this.isOpen;
-        },
-        handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                this.fileName = file.name;
-            } else {
-                this.fileName = '';
-            }
-        },
-        handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                this.fileName = file.name;
-            }
-        },
-        uploadFile() {
-            if (this.isUploading) return;
+// Initialize store
+const dataProcessor = useDataProcessorStore()
 
-            this.isUploading = true;
-            this.uploadProgress = 0;
+// Reactive data
+const navItems = ref([
+    {
+        to: '/',
+        label: 'Home',
+        icon: '/icons/house.svg'
+    },
+    {
+        to: '/books',
+        label: 'Books',
+        icon: '/icons/book.svg'
+    },
+    {
+        to: '/stats',
+        label: 'Statistics',
+        icon: '/icons/line-chart.svg'
+    },
+    {
+        to: '/quotes',
+        label: 'Quotes',
+        icon: '/icons/bookmark.svg'
+    },
+    {
+        to: '/export',
+        label: 'Export',
+        icon: '/icons/export.svg'
+    }
+])
 
-            this.uploadInterval = setInterval(() => {
-                if (this.uploadProgress < 100) {
-                    this.uploadProgress += 5;
-                } else {
-                    this.completeUpload();
-                }
-            }, 200);
-        },
-        cancelUpload() {
-            clearInterval(this.uploadInterval);
-            this.uploadProgress = 0;
-            this.isUploading = false;
-        },
-        completeUpload() {
-            clearInterval(this.uploadInterval);
-            this.isUploading = false;
-            // Here you would typically process the uploaded file
-            console.log('Upload complete');
-        }
+const isOpen = ref(false)
+const isMobile = ref(false)
+const showBooks = ref(false)
+const showImportDialog = ref(false)
+const fileName = ref('')
+const uploadProgress = ref(0)
+const isUploading = ref(false)
+const uploadInterval = ref(null)
+const selectedFile = ref(null)
+
+// Methods
+const checkMobile = () => {
+    isMobile.value = window.innerWidth < 900
+}
+
+const toggleNav = () => {
+    isOpen.value = !isOpen.value
+}
+
+const handleFileUpload = (event) => {
+    const file = event.target.files[0]
+    if (file) {
+        fileName.value = file.name
+        selectedFile.value = file
+    } else {
+        fileName.value = ''
+        selectedFile.value = null
     }
 }
+
+const uploadFile = async () => {
+    if (isUploading.value || !selectedFile.value) return
+
+    isUploading.value = true
+    uploadProgress.value = 0
+
+    try {
+        // Simulate upload progress
+        uploadInterval.value = setInterval(() => {
+            if (uploadProgress.value < 90) {
+                uploadProgress.value += 5
+            }
+        }, 100)
+
+        // Read and process the file
+        const content = await selectedFile.value.text()
+        const result = await dataProcessor.parseKindleClippings(content)
+        
+        // Complete the progress
+        uploadProgress.value = 100
+        
+        // Show success message
+        setTimeout(() => {
+            alert(`Successfully imported ${result.quotesProcessed} quotes from ${result.booksProcessed} books!`)
+            showImportDialog.value = false
+            fileName.value = ''
+            selectedFile.value = null
+            uploadProgress.value = 0
+            
+            if (result.errors.length > 0) {
+                console.warn('Some errors occurred during import:', result.errors)
+            }
+        }, 500)
+        
+    } catch (error) {
+        console.error('Error processing file:', error)
+        alert('Error processing file. Please make sure it\'s a valid Kindle clippings file.')
+    } finally {
+        clearInterval(uploadInterval.value)
+        isUploading.value = false
+    }
+}
+
+const cancelUpload = () => {
+    clearInterval(uploadInterval.value)
+    uploadProgress.value = 0
+    isUploading.value = false
+}
+
+// Lifecycle hooks
+onMounted(() => {
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+})
+
+onBeforeUnmount(() => {
+    window.removeEventListener('resize', checkMobile)
+    if (uploadInterval.value) {
+        clearInterval(uploadInterval.value)
+    }
+})
 </script>
 
 <style>

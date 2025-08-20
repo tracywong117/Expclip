@@ -2,7 +2,7 @@
     <div class="container mx-auto p-4">
       <div class="flex justify-between items-center mb-4">
         <div class="flex flex-row items-center gap-5">
-          <div class="text-2xl font-bold text-customPurple-600">All Books</div>
+          <div class="text-3xl font-bold">All Books</div>
         </div>
   
         <div class="flex items-center space-x-4">
@@ -19,7 +19,7 @@
             v-for="book in paginatedBooks"
             :key="book.id"
             class="rounded-lg p-4 w-fit flex flex-col items-center justify-center cursor-pointer"
-            @click="goToBookInstance(book.title)"
+            @click="goToBookInstance(book.id)"
           >
             <img v-if="book.cover" :src="book.cover" alt="Book Cover" class="w-48 h-48 object-cover rounded-lg" />
             <div v-if="!book.cover" class="w-48 h-48 border flex justify-center items-center cursor-pointer"></div>
@@ -40,7 +40,7 @@
           v-for="book in paginatedBooks"
           :key="book.id"
           class="rounded-lg p-4 w-full cursor-pointer flex justify-between items-center"
-          @click="goToBookInstance(book.title)"
+          @click="goToBookInstance(book.id)"
         >
           <div class="flex">
             <img v-if="book.cover" :src="book.cover" alt="Book Cover" class="w-48 h-48 object-cover rounded-lg" />
@@ -92,71 +92,138 @@
     </div>
   </template>
   
-  <script>
-  import ListGridToggle from '@/components/ListGridToggle.vue';
-  import TagSelector from '@/components/TagSelector.vue';
-  
-  export default {
-    components: {
-      ListGridToggle,
-      TagSelector,
-    },
-    data() {
-      return {
-        books: [
-          { id: 1, cover: '', title: 'The Great Gatsby', author: 'F. Scott Fitzgerald', tags: ['Classic', 'Novel'], stars: 4 },
-          { id: 2, cover: '', title: 'To Kill a Mockingbird', author: 'Harper Lee', tags: ['Classic', 'Drama'], stars: 5 },
-          { id: 3, cover: '', title: '1984', author: 'George Orwell', tags: ['Dystopian', 'Science Fiction'], stars: 4 },
-          { id: 4, cover: '', title: 'Pride and Prejudice', author: 'Jane Austen', tags: ['Romance', 'Classic'], stars: 5 },
-          { id: 5, cover: '', title: 'The Catcher in the Rye', author: 'J.D. Salinger', tags: ['Classic', 'Coming-of-Age'], stars: 3 },
-          { id: 6, cover: '', title: 'Moby-Dick', author: 'Herman Melville', tags: ['Adventure', 'Classic'], stars: 4 },
-          { id: 7, cover: '', title: 'War and Peace', author: 'Leo Tolstoy', tags: ['Historical', 'Classic'], stars: 5 },
-          { id: 8, cover: '', title: 'The Odyssey', author: 'Homer', tags: ['Epic', 'Classic'], stars: 4 },
-          { id: 9, cover: '', title: 'Crime and Punishment', author: 'Fyodor Dostoevsky', tags: ['Classic', 'Psychological'], stars: 5 },
-          { id: 10, cover: '', title: 'Brave New World', author: 'Aldous Huxley', tags: ['Dystopian', 'Science Fiction'], stars: 4 },
-        ],
-        tags: [
-          'Classic',
-          'Novel',
-          'Drama',
-          'Dystopian',
-          'Science Fiction',
-          'Romance',
-          'Coming-of-Age',
-          'Adventure',
-          'Historical',
-          'Epic',
-          'Psychological',
-        ],
-        selectedTags: [],
-        currentPage: 1,
-        booksPerPage: 8,
-        viewMode: 'grid', // 'list' or 'grid'
-      };
-    },
-    computed: {
-      paginatedBooks() {
-        const start = (this.currentPage - 1) * this.booksPerPage;
-        const end = start + this.booksPerPage;
-        return this.books.slice(start, end);
-      },
-      totalPages() {
-        return Math.ceil(this.books.length / this.booksPerPage);
-      },
-    },
-    methods: {
-      handleViewModeChange(newView) {
-        this.viewMode = newView;
-      },
-      handleSelectedTags(tags) {
-        this.selectedTags = tags;
-      },
-      goToBookInstance(title) {
-        const formattedTitle = title.replace(/\s+/g, '-');
-        this.$router.push(`/books/${formattedTitle}`);
-      },
-    },
-  };
+  <script setup>
+  import { computed, ref, onMounted } from 'vue'
+  import { useRouter } from 'vue-router'
+  import { useBooksStore } from '@/stores'
+  import ListGridToggle from '@/components/ListGridToggle.vue'
+  import TagSelector from '@/components/TagSelector.vue'
+
+  // Initialize store and router
+  const booksStore = useBooksStore()
+  const router = useRouter()
+
+  // Reactive data
+  const selectedTags = ref([])
+  const currentPage = ref(1)
+  const booksPerPage = ref(8)
+  const viewMode = ref('grid') // 'list' or 'grid'
+
+  // Computed properties
+  const books = computed(() => {
+    let filteredBooks = booksStore.books
+    
+    // Filter by selected tags if any
+    if (selectedTags.value.length > 0) {
+      filteredBooks = filteredBooks.filter(book => 
+        book.tags && book.tags.some(tag => selectedTags.value.includes(tag))
+      )
+    }
+    
+    return filteredBooks
+  })
+
+  const tags = computed(() => {
+    // Get all unique tags from all books
+    const allTags = new Set()
+    booksStore.books.forEach(book => {
+      if (book.tags) {
+        book.tags.forEach(tag => allTags.add(tag))
+      }
+    })
+    return Array.from(allTags).sort()
+  })
+
+  const paginatedBooks = computed(() => {
+    const start = (currentPage.value - 1) * booksPerPage.value
+    const end = start + booksPerPage.value
+    return books.value.slice(start, end)
+  })
+
+  const totalPages = computed(() => {
+    return Math.ceil(books.value.length / booksPerPage.value)
+  })
+
+  // Methods
+  const handleViewModeChange = (newView) => {
+    viewMode.value = newView
+  }
+
+  const handleSelectedTags = (tags) => {
+    selectedTags.value = tags
+    currentPage.value = 1 // Reset to first page when filtering
+  }
+
+  const goToBookInstance = (bookId) => {
+    router.push(`/books/${bookId}`)
+  }
+
+  // Initialize with sample data if store is empty
+  onMounted(() => {
+    if (booksStore.bookCount === 0) {
+      // Add sample books with tags
+      const sampleBooks = [
+        { 
+          title: 'The Great Gatsby', 
+          author: 'F. Scott Fitzgerald', 
+          tags: ['Classic', 'Novel'], 
+          stars: 4,
+          additionalInfo: { 
+            'Genre': 'Fiction', 
+            'Year': '1925', 
+            'Publisher': 'Scribner',
+            'Pages': '180'
+          }
+        },
+        { 
+          title: 'To Kill a Mockingbird', 
+          author: 'Harper Lee', 
+          tags: ['Classic', 'Drama'], 
+          stars: 5,
+          additionalInfo: { 
+            'Genre': 'Fiction', 
+            'Year': '1960', 
+            'Setting': 'Alabama'
+          }
+        },
+        { 
+          title: '1984', 
+          author: 'George Orwell', 
+          tags: ['Dystopian', 'Science Fiction'], 
+          stars: 4,
+          additionalInfo: { 
+            'Genre': 'Dystopian Fiction', 
+            'Year': '1949', 
+            'Publisher': 'Secker & Warburg'
+          }
+        },
+        { title: 'Pride and Prejudice', author: 'Jane Austen', tags: ['Romance', 'Classic'], stars: 5 },
+        { title: 'The Catcher in the Rye', author: 'J.D. Salinger', tags: ['Classic', 'Coming-of-Age'], stars: 3 },
+        { title: 'Moby-Dick', author: 'Herman Melville', tags: ['Adventure', 'Classic'], stars: 4 },
+        { title: 'War and Peace', author: 'Leo Tolstoy', tags: ['Historical', 'Classic'], stars: 5 },
+        { title: 'The Odyssey', author: 'Homer', tags: ['Epic', 'Classic'], stars: 4 },
+        { title: 'Crime and Punishment', author: 'Fyodor Dostoevsky', tags: ['Classic', 'Psychological'], stars: 5 },
+        { title: 'Brave New World', author: 'Aldous Huxley', tags: ['Dystopian', 'Science Fiction'], stars: 4 },
+      ]
+      
+      sampleBooks.forEach(bookData => {
+        const book = booksStore.addBook(bookData)
+        
+        // Add some sample quotes for each book
+        for (let i = 0; i < Math.floor(Math.random() * 3) + 1; i++) {
+          const quote = quotesStore.addQuote({
+            text: `Sample quote ${i + 1} from ${book.title}`,
+            bookId: book.id,
+            location: `${100 + i * 50}`,
+            page: 10 + i * 5,
+            color: ['yellow', 'blue', 'green', 'pink'][Math.floor(Math.random() * 4)]
+          })
+          
+          booksStore.addQuoteToBook(book.id, quote.id)
+        }
+      })
+    }
+  })
   </script>
   
   <style scoped>
