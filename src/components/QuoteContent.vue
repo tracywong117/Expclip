@@ -8,7 +8,7 @@
     </div>
     <div class="flex justify-between">
         <div>
-            <span class="font-semibold text-gray-800">{{ bookTitle }}</span>
+            <span @click="goToBook" class="font-semibold text-gray-800 cursor-pointer hover:text-violet-600 hover:underline">{{ bookTitle }}</span>
             <span class="ml-2 text-sm text-gray-600">{{ bookAuthor }}</span>
         </div>
         <div>
@@ -30,7 +30,7 @@
         </div>
         <div class="flex space-x-2 text-[14px]">
             <button v-if="!isEditing" @click="startEdit" 
-                    class="border border-slate-300 text-slate-800 hover:bg-slate-200 px-3 py-1 rounded">
+                    class="bg-white border border-customPurple-400 hover:bg-customPurple-400 text-customPurple-900 px-3 py-1 rounded">
                 Edit
             </button>
             <button v-if="isEditing" @click="saveEdit" 
@@ -52,6 +52,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useQuotesStore, useBooksStore } from '@/stores'
 import HeartIcon from './HeartIcon.vue'
 import HighlightPopover from './HighlightPopover.vue'
@@ -63,6 +64,9 @@ const props = defineProps({
         required: true
     }
 })
+
+// Router
+const router = useRouter()
 
 // Stores
 const quotesStore = useQuotesStore()
@@ -126,6 +130,12 @@ const cancelEdit = () => {
 const deleteQuote = () => {
     if (confirm('Are you sure you want to delete this quote?')) {
         quotesStore.deleteQuote(props.quote.id)
+    }
+}
+
+const goToBook = () => {
+    if (props.quote.bookId) {
+        router.push(`/books/${props.quote.bookId}`)
     }
 }
 </script>

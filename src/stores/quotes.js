@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { generateQuoteId } from '../utils/helpers.js'
+import { StorageService } from '../services/StorageService.js'
 
 export const useQuotesStore = defineStore('quotes', () => {
-  // State
-  const quotes = ref([])
+  // State - Initialize from localStorage
+  const quotes = ref(StorageService.loadQuotes())
   const loading = ref(false)
   const error = ref(null)
 
@@ -127,6 +128,42 @@ export const useQuotesStore = defineStore('quotes', () => {
     quotes.value = []
   }
 
+  // Backup and restore functions
+  function clearAllQuotes() {
+    quotes.value = []
+  }
+
+  function restoreQuote(quoteData) {
+    if (!quoteData || !quoteData.id) {
+      console.error('Invalid quote data for restore:', quoteData)
+      return false
+    }
+
+    try {
+      const quote = {
+        id: quoteData.id,
+        text: quoteData.text || '',
+        bookId: quoteData.bookId || null,
+        bookTitle: quoteData.bookTitle || '',
+        author: quoteData.author || '',
+        page: quoteData.page || null,
+        location: quoteData.location || null,
+        chapter: quoteData.chapter || '',
+        note: quoteData.note || '',
+        tags: Array.isArray(quoteData.tags) ? quoteData.tags : [],
+        isFavorite: Boolean(quoteData.isFavorite),
+        createdAt: quoteData.createdAt || new Date().toISOString(),
+        updatedAt: quoteData.updatedAt || new Date().toISOString()
+      }
+
+      quotes.value.push(quote)
+      return true
+    } catch (error) {
+      console.error('Error restoring quote:', error)
+      return false
+    }
+  }
+
   function setLoading(state) {
     loading.value = state
   }
@@ -138,6 +175,11 @@ export const useQuotesStore = defineStore('quotes', () => {
   function clearError() {
     error.value = null
   }
+
+  // Auto-save to localStorage whenever quotes change
+  watch(quotes, (newQuotes) => {
+    StorageService.saveQuotes(newQuotes)
+  }, { deep: true })
 
   return {
     // State
@@ -164,6 +206,8 @@ export const useQuotesStore = defineStore('quotes', () => {
     getQuotesByTag,
     getAllTags,
     clearQuotes,
+    clearAllQuotes,
+    restoreQuote,
     setLoading,
     setError,
     clearError

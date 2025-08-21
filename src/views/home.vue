@@ -78,28 +78,28 @@
                 <span class="text-xl font-semibold block mb-3">Export</span>
                 <span class="text-gray-400">You can export your highlights into the following format.</span>
                 <div class="grid grid-cols-2 gap-4 mt-4">
-                    <div class="text-[14px] text-gray-500 cursor-pointer  
-        rounded px-2 py-1 hover:bg-gray-50 flex items-center">
+                    <div class="text-[14px] text-gray-500  
+        rounded px-2 py-1 flex items-center">
                         <img src="icons/pdf.svg" class="w-8 h-8 mr-2" alt="PDF icon" />
                         PDF
                     </div>
-                    <div class="text-[14px] text-gray-500 cursor-pointer  
-        rounded px-2 py-1 hover:bg-gray-50 flex items-center">
+                    <div class="text-[14px] text-gray-500  
+        rounded px-2 py-1 flex items-center">
                         <img src="icons/txt.svg" class="w-8 h-8 mr-2" alt="TXT icon" />
                         TXT
                     </div>
-                    <div class="text-[14px] text-gray-500 cursor-pointer  
-        rounded px-2 py-1 hover:bg-gray-50 flex items-center">
+                    <!-- <div class="text-[14px] text-gray-500  
+        rounded px-2 py-1 flex items-center">
                         <img src="icons/png.svg" class="w-8 h-8 mr-2" alt="PNG icon" />
                         PNG
-                    </div>
-                    <div class="text-[14px] text-gray-500 cursor-pointer  
-        rounded px-2 py-1 hover:bg-gray-50 flex items-center">
+                    </div> -->
+                    <div class="text-[14px] text-gray-500  
+        rounded px-2 py-1 flex items-center">
                         <img src="icons/docx.svg" class="w-8 h-8 mr-2" alt="DOCX icon" />
                         DOCX
                     </div>
-                    <div class="text-[14px] text-gray-500 cursor-pointer  
-        rounded px-2 py-1 hover:bg-gray-50 flex items-center">
+                    <div class="text-[14px] text-gray-500  
+        rounded px-2 py-1 flex items-center">
                         <img src="icons/csv.svg" class="w-8 h-8 mr-2" alt="CSV icon" />
                         CSV
                     </div>
@@ -133,7 +133,12 @@ const booksStore = useBooksStore()
 const quotesStore = useQuotesStore()
 
 // Computed properties from stores
-const books = computed(() => booksStore.favoriteBooks.slice(0, 3))
+const books = computed(() => {
+    // Get all books, shuffle them, and take the first 3
+    const allBooks = [...booksStore.books]
+    const shuffled = allBooks.sort(() => 0.5 - Math.random())
+    return shuffled.slice(0, 3)
+})
 const stats = computed(() => ({
     booksRead: booksStore.bookCount,
     quotesMade: quotesStore.quoteCount
@@ -167,7 +172,7 @@ onMounted(() => {
             title: 'Harry Potter and the Sorcerer\'s Stone',
             author: 'J.K. Rowling',
             stars: 5,
-            image: 'images/harry-potter-1.jpg',
+            cover: 'https://media.harrypotterfanzone.com/sorcerers-stone-us-childrens-edition.jpg',
             isFavorite: true,
             tags: ['fantasy', 'young-adult']
         })
@@ -175,7 +180,7 @@ onMounted(() => {
             title: 'Harry Potter and the Chamber of Secrets',
             author: 'J.K. Rowling',
             stars: 3,
-            image: 'images/harry-potter-2.jpg',
+            cover: 'https://res.cloudinary.com/bloomsbury-atlas/image/upload/w_568,c_scale,dpr_1.5/jackets/9781408855669.jpg',
             isFavorite: true,
             tags: ['fantasy', 'young-adult']
         })
@@ -183,28 +188,23 @@ onMounted(() => {
             title: 'Harry Potter and the Prisoner of Azkaban',
             author: 'J.K. Rowling',
             stars: 5,
-            image: 'images/harry-potter-3.jpg',
             isFavorite: true,
-            tags: ['fantasy', 'young-adult']
+            // tags: ['fantasy', 'young-adult']
         })
 
         // Add some sample quotes linked to books
         if (quotesStore.quoteCount === 0) {
             const quote1 = quotesStore.addQuote({
                 text: 'It takes a great deal of bravery to stand up to our enemies, but just as much to stand up to our friends.',
-                bookTitle: book1.title,
                 bookId: book1.id,
-                author: book1.author,
-                tags: ['wisdom', 'courage'],
+                // tags: ['wisdom', 'courage'],
                 color: 'yellow'
             })
             
             const quote2 = quotesStore.addQuote({
                 text: 'It is our choices, Harry, that show what we truly are, far more than our abilities.',
-                bookTitle: book2.title,
                 bookId: book2.id,
-                author: book2.author,
-                tags: ['choices', 'character'],
+                // tags: ['choices', 'character'],
                 color: 'blue'
             })
 

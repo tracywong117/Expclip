@@ -6,7 +6,7 @@
       class="fixed inset-0 bg-gray-700 bg-opacity-60 flex items-center justify-center z-[9999]"
     >
       <div
-        class="bg-white rounded-lg shadow-2xl max-w-[90vw] w-full sm:max-w-lg p-6 relative z-[10000]"
+        class="bg-white rounded-lg shadow-2xl md:max-w-[50vw] sm:max-w-[75vw] w-full p-6 relative z-[10000]"
       >
         <slot></slot>
       </div>

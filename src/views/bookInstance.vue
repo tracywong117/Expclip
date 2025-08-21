@@ -1,198 +1,188 @@
 <template>
-<div class="container mx-auto p-4">
-    <!-- Loading state -->
-    <div v-if="!book" class="text-center py-8">
-        <p class="text-gray-500">Book not found</p>
-        <router-link to="/books" class="text-blue-500 hover:text-blue-700">← Back to Books</router-link>
-    </div>
+    <div class="container mx-auto p-4">
+        <!-- Loading state -->
+        <div v-if="!book" class="text-center py-8">
+            <p class="text-gray-500">Book not found</p>
+            <router-link to="/books" class="text-blue-500 hover:text-blue-700">← Back to Books</router-link>
+        </div>
 
-    <!-- Book content -->
-    <div v-else>
-        <!-- Book Header -->
-        <div class="flex flex-col md:flex-row items-center gap-6 mb-6">
-            <img v-if="book.cover || book.image" 
-                 :src="book.cover || book.image" 
-                 alt="Book Cover" 
-                 class="w-64 h-64 object-cover rounded-lg" />
-            <div v-else class="w-64 h-64 border flex justify-center items-center rounded-lg bg-gray-50">
-                <span class="text-gray-400">No Cover Available</span>
-            </div>
-            
-            <div class="flex flex-col flex-1">
-                <!-- Display Mode -->
-                <div v-if="!isEditing">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="flex-1">
-                            <h1 class="text-3xl font-bold mb-2">{{ book.title }}</h1>
-                            <p class="text-lg text-gray-600 mb-4">by {{ book.author }}</p>
-                        </div>
-                        <button @click="startEditing" 
-                                class="bg-customPurple-200 hover:bg-customPurple-400 text-customPurple-900 px-4 py-2 rounded">
-                            Edit
-                        </button>
-                    </div>
-                    
-                    <!-- Star Rating -->
-                    <div class="flex items-center mb-4">
-                        <span v-for="star in 5" :key="star" 
-                              @click="updateStars(star)"
-                              class="text-amber-300 cursor-pointer text-xl hover:text-amber-400">
-                            <i v-if="star <= book.stars" class="fas fa-star mr-1"></i>
-                            <i v-else class="far fa-star mr-1"></i>
-                        </span>
-                        <span class="ml-2 text-gray-500">({{ book.stars }}/5)</span>
-                    </div>
-
-                    <!-- Book Stats -->
-                    <div class="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-4">
-                        <div>
-                            <strong>Quotes:</strong> {{ bookQuotes.length }}
-                        </div>
-                        <div>
-                            <strong>Favorites:</strong> {{ favoriteQuotes.length }}
-                        </div>
-                        <div>
-                            <strong>Date Added:</strong> {{ formatDate(book.dateAdded) }}
-                        </div>
-                        <div>
-                            <strong>Last Updated:</strong> {{ formatDate(book.lastModified) }}
-                        </div>
-                    </div>
-
-                    <!-- Additional Information Display -->
-                    <div v-if="book.additionalInfo && Object.keys(book.additionalInfo).length > 0" class="mb-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                            <div v-for="(value, key) in book.additionalInfo" :key="key" 
-                                 class="flex justify-between">
-                                <span class="font-medium text-gray-700">{{ key }}:</span>
-                                <span class="text-gray-600">{{ value }}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Tags Display -->
-                    <div v-if="book.tags && book.tags.length > 0" class="flex flex-wrap gap-2">
-                        <span v-for="tag in book.tags" :key="tag" 
-                              class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                            {{ tag }}
-                        </span>
-                    </div>
+        <!-- Book content -->
+        <div v-else>
+            <!-- Book Header -->
+            <div class="flex flex-col md:flex-row items-center gap-6 mb-6">
+                <img v-if="book.cover" :src="book.cover" alt="Book Cover" class="w-64 h-64 object-cover rounded-lg" />
+                <div v-else class="w-64 h-64 border flex justify-center items-center rounded-lg bg-gray-50">
+                    <span class="text-gray-400">No Cover Available</span>
                 </div>
 
-                <!-- Edit Mode -->
-                <div v-else>
-                    <div class="space-y-4">
-                        <!-- Title and Author -->
-                        <div class="flex gap-2 items-end">
+                <div class="flex flex-col flex-1">
+                    <!-- Display Mode -->
+                    <div v-if="!isEditing">
+                        <div class="flex justify-between items-start mb-4">
                             <div class="flex-1">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                                <input v-model="editForm.title" 
-                                       class="w-full p-3 border rounded text-lg font-semibold" 
-                                       placeholder="Book Title">
+                                <h1 class="text-3xl font-bold mb-2">{{ book.title }}</h1>
+                                <p class="text-lg text-gray-600 mb-4">by {{ book.author }}</p>
                             </div>
-                            <div class="flex gap-2">
-                                <button @click="saveChanges" 
-                                        class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-                                    Save
-                                </button>
-                                <button @click="cancelEditing" 
-                                        class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
-                                    Cancel
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Author</label>
-                            <input v-model="editForm.author" 
-                                   class="w-full p-3 border rounded" 
-                                   placeholder="Author Name">
-                        </div>
-                        
-                        <!-- Cover URL -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Cover Image URL</label>
-                            <input v-model="editForm.cover" 
-                                   class="w-full p-3 border rounded" 
-                                   placeholder="https://example.com/cover.jpg">
-                        </div>
-                        
-                        <!-- Rating -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Rating</label>
-                            <div class="flex items-center">
-                                <span v-for="star in 5" :key="star" 
-                                      @click="editForm.stars = star"
-                                      class="text-amber-300 cursor-pointer text-xl hover:text-amber-400">
-                                    <i v-if="star <= editForm.stars" class="fas fa-star mr-1"></i>
-                                    <i v-else class="far fa-star mr-1"></i>
-                                </span>
-                                <span class="ml-2 text-gray-500">({{ editForm.stars }}/5)</span>
-                            </div>
-                        </div>
-                        
-                        <!-- Tags -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Tags (comma-separated)</label>
-                            <input v-model="tagsInput" 
-                                   class="w-full p-3 border rounded" 
-                                   placeholder="Classic, Fiction, Romance">
-                        </div>
-                        
-                        <!-- Additional Information -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Additional Information</label>
-                            <div v-for="(field, index) in editableFields" :key="index" 
-                                 class="flex gap-2 items-center mb-2">
-                                <input v-model="field.key" 
-                                       placeholder="Field name (e.g., Genre, Year, Publisher)" 
-                                       class="flex-1 p-2 border rounded">
-                                <input v-model="field.value" 
-                                       placeholder="Value" 
-                                       class="flex-1 p-2 border rounded">
-                                <button @click="removeField(index)" 
-                                        class="text-red-500 hover:text-red-700 px-2">
-                                    ✕
-                                </button>
-                            </div>
-                            
-                            <button @click="addField" 
-                                    class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm">
-                                Add Field
+                            <button @click="startEditing"
+                                class="bg-customPurple-200 hover:bg-customPurple-400 text-customPurple-900 px-4 py-1 rounded">
+                                Edit
                             </button>
                         </div>
+
+                        <!-- Star Rating -->
+                        <div class="flex items-center mb-4">
+                            <span v-for="star in 5" :key="star" @click="updateStars(star)"
+                                class="text-amber-300 cursor-pointer text-xl hover:text-amber-400">
+                                <i v-if="star <= book.stars" class="fas fa-star mr-1"></i>
+                                <i v-else class="far fa-star mr-1"></i>
+                            </span>
+                            <span class="ml-2 text-gray-500">({{ book.stars }}/5)</span>
+                        </div>
+
+                        <!-- Book Stats -->
+                        <div class="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-4">
+                            <div>
+                                <strong>Quotes:</strong> {{ bookQuotes.length }}
+                            </div>
+                            <div>
+                                <strong>Favorites quotes:</strong> {{ favoriteQuotes.length }}
+                            </div>
+                            <div>
+                                <strong>Date Added:</strong> {{ formatDate(book.dateAdded) }}
+                            </div>
+                            <div>
+                                <strong>Last Updated:</strong> {{ formatDate(book.lastModified) }}
+                            </div>
+                        </div>
+
+                        <!-- Additional Information Display -->
+                        <div v-if="book.additionalInfo && Object.keys(book.additionalInfo).length > 0" class="mb-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                                <div v-for="(value, key) in book.additionalInfo" :key="key"
+                                    class="flex justify-between">
+                                    <span class="font-medium text-gray-700"><strong>{{ key }}:</strong> {{ value }}</span>
+                                    <!-- <span class="text-gray-600">{{ value }}</span> -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tags Display -->
+                        <div v-if="book.tags && book.tags.length > 0" class="flex flex-wrap gap-2">
+                            <span v-for="tag in book.tags" :key="tag"
+                                class="inline-block bg-violet-100 text-violet-800 text-xs px-2 py-1 rounded-full">
+                                {{ tag }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Edit Mode -->
+                    <div v-else>
+                        <div class="space-y-4">
+                            <!-- Title and Author -->
+                            <div class="flex gap-2 items-end">
+                                <div class="flex-1">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                                    <input v-model="editForm.title"
+                                        class="w-full p-3 border rounded text-lg font-semibold"
+                                        placeholder="Book Title">
+                                </div>
+                                
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Author</label>
+                                <input v-model="editForm.author" class="w-full p-3 border rounded"
+                                    placeholder="Author Name">
+                            </div>
+
+                            <!-- Cover URL -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Cover Image URL</label>
+                                <input v-model="editForm.cover" class="w-full p-3 border rounded"
+                                    placeholder="https://example.com/cover.jpg">
+                            </div>
+
+                            <!-- Rating -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Rating</label>
+                                <div class="flex items-center">
+                                    <span v-for="star in 5" :key="star" @click="editForm.stars = star"
+                                        class="text-amber-300 cursor-pointer text-xl hover:text-amber-400">
+                                        <i v-if="star <= editForm.stars" class="fas fa-star mr-1"></i>
+                                        <i v-else class="far fa-star mr-1"></i>
+                                    </span>
+                                    <span class="ml-2 text-gray-500">({{ editForm.stars }}/5)</span>
+                                </div>
+                            </div>
+
+                            <!-- Tags -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tags
+                                    (comma-separated)</label>
+                                <input v-model="tagsInput" class="w-full p-3 border rounded"
+                                    placeholder="Classic, Fiction, Romance">
+                            </div>
+
+                            <!-- Additional Information -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Additional
+                                    Information</label>
+                                <div v-for="(field, index) in editableFields" :key="index"
+                                    class="flex gap-2 items-center mb-2">
+                                    <input v-model="field.key" placeholder="Field name (e.g., Genre, Year, Publisher)"
+                                        class="flex-1 p-2 border rounded">
+                                    <input v-model="field.value" placeholder="Value" class="flex-1 p-2 border rounded">
+                                    <button @click="removeField(index)" class="text-red-500 hover:text-red-700 px-2">
+                                        ✕
+                                    </button>
+                                </div>
+
+                                <button @click="addField"
+                                    class="bg-white text-blue-500 border border-blue-300 px-3 py-1 rounded hover:bg-blue-100 text-sm">
+                                    Add Field
+                                </button>
+
+                                <div class="mt-5 flex w-full justify-end">
+                                    <div class="flex gap-2">
+                                        <button @click="saveChanges"
+                                            class="bg-blue-200 text-blue-800 hover:bg-blue-300 px-3 py-1 rounded">
+                                            Save
+                                        </button>
+                                        <button @click="cancelEditing"
+                                            class="bg-gray-200 text-gray-800 hover:bg-gray-300 px-3 py-1 rounded">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Quotes Section -->
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-2xl font-bold">Quotes ({{ bookQuotes.length }})</h2>
-                <div class="flex gap-2">
-                    <button @click="showFavoritesOnly = !showFavoritesOnly"
-                            :class="showFavoritesOnly ? 'bg-white border' : 'bg-amber-100 text-yellow-700 hover:bg-amber-200'"
+            <!-- Quotes Section -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold">Quotes ({{ bookQuotes.length }})</h2>
+                    <div class="flex gap-2">
+                        <button @click="showFavoritesOnly = !showFavoritesOnly"
+                            :class="showFavoritesOnly ? 'bg-white text-customPurple-900 border hover:bg-customPurple-300 border-customPurple-500' : 'bg-white border border-yellow-400 text-yellow-600 hover:bg-yellow-100'"
                             class="px-3 py-1 rounded text-sm">
-                        {{ showFavoritesOnly ? 'Show All' : 'Favorites Only' }}
-                    </button>
+                            {{ showFavoritesOnly ? 'Show All' : 'Favorites Only' }}
+                        </button>
+                    </div>
                 </div>
-            </div>
 
-            <div v-if="displayedQuotes.length === 0" class="text-gray-500 text-center py-8">
-                <p>{{ showFavoritesOnly ? 'No favorite quotes yet.' : 'No quotes available for this book.' }}</p>
-            </div>
+                <div v-if="displayedQuotes.length === 0" class="text-gray-500 text-center py-8">
+                    <p>{{ showFavoritesOnly ? 'No favorite quotes yet.' : 'No quotes available for this book.' }}</p>
+                </div>
 
-            <div v-else class="space-y-4">
-                <QuoteContent 
-                    v-for="quote in displayedQuotes" 
-                    :key="quote.id" 
-                    :quote="quote" 
-                />
+                <div v-else class="space-y-4">
+                    <QuoteContent v-for="quote in displayedQuotes" :key="quote.id" :quote="quote" />
+                </div>
             </div>
         </div>
     </div>
-</div>
 </template>
 
 <script>
@@ -211,7 +201,7 @@ export default {
         const route = useRoute()
         const booksStore = useBooksStore()
         const quotesStore = useQuotesStore()
-        
+
         // Reactive data
         const book = ref(null)
         const isEditing = ref(false)
@@ -239,7 +229,7 @@ export default {
         const loadBook = () => {
             const bookId = route.params.id
             const foundBook = booksStore.getBookById(bookId)
-            
+
             if (foundBook) {
                 book.value = foundBook
                 if (!book.value.additionalInfo) {
@@ -257,7 +247,7 @@ export default {
                 key: key,
                 value: value
             }))
-            
+
             // Add an empty field if none exist
             if (editableFields.value.length === 0) {
                 editableFields.value.push({ key: '', value: '' })
@@ -288,12 +278,12 @@ export default {
 
         const saveChanges = () => {
             if (!book.value) return
-            
+
             // Process tags
-            const tags = tagsInput.value 
+            const tags = tagsInput.value
                 ? tagsInput.value.split(',').map(tag => tag.trim()).filter(tag => tag)
                 : []
-            
+
             // Process additional info
             const newAdditionalInfo = {}
             editableFields.value.forEach(field => {
@@ -301,7 +291,7 @@ export default {
                     newAdditionalInfo[field.key.trim()] = field.value.trim()
                 }
             })
-            
+
             // Update the book
             const updatedBook = {
                 ...book.value,
@@ -313,12 +303,12 @@ export default {
                 additionalInfo: newAdditionalInfo,
                 lastModified: new Date().toISOString()
             }
-            
+
             booksStore.updateBook(book.value.id, updatedBook)
-            
+
             // Update local book reference
             book.value = updatedBook
-            
+
             isEditing.value = false
         }
 
@@ -328,7 +318,7 @@ export default {
 
         const removeField = (index) => {
             editableFields.value.splice(index, 1)
-            
+
             // Ensure at least one field exists
             if (editableFields.value.length === 0) {
                 editableFields.value.push({ key: '', value: '' })
@@ -361,13 +351,13 @@ export default {
                 editForm.value.stars = starCount
             } else {
                 if (!book.value) return
-                
+
                 booksStore.updateBook(book.value.id, {
                     ...book.value,
                     stars: starCount,
                     lastModified: new Date().toISOString()
                 })
-                
+
                 book.value.stars = starCount
                 book.value.lastModified = new Date().toISOString()
             }

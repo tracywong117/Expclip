@@ -54,6 +54,14 @@ export default {
       isPopoverOpen.value = !isPopoverOpen.value;
     };
 
+    const closePopover = () => {
+      isPopoverOpen.value = false;
+    };
+
+    const openPopover = () => {
+      isPopoverOpen.value = true;
+    };
+
     const calculatePosition = () => {
       if (!container.value || !popover.value) return;
 
@@ -167,11 +175,26 @@ export default {
       window.removeEventListener('resize', handleResize);
     });
 
+    // Expose methods for parent components
+    const exposed = {
+      togglePopover,
+      closePopover,
+      openPopover,
+      isOpen: isPopoverOpen
+    };
+
+    // For Vue 3 script setup
+    if (typeof defineExpose !== 'undefined') {
+      defineExpose(exposed);
+    }
+
     return {
       isPopoverOpen,
       container,
       popover,
       togglePopover,
+      closePopover,
+      openPopover,
       popoverStyle
     };
   }

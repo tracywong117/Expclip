@@ -95,20 +95,33 @@
         <div class="main-content w-full min-h-screen ml-[325px] mr-[25px] md:ml-[325px] transition-all duration-300"
             :class="{ 'ml-0 mr-4': true }">
             <div class="">
-                <div class="text-3xl font-bold my-6">Book Quotes</div>
+                <div class="flex justify-between items-center">
+                    <div class="text-3xl font-bold my-6">Quotes</div>
+                    <button
+                        class="mobile-menu-btn md:hidden bg-white px-2 py-1 rounded border"
+                        @click="toggleSidebar" aria-label="Toggle filters menu">
+                        Filters
+                    </button>
+                </div>
                 
                 <div class="flex justify-between items-center mb-4">
-                    <button
-                        class="mobile-menu-btn md:hidden bg-white p-2 rounded-lg border"
-                        @click="toggleSidebar" aria-label="Toggle filters menu">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 6h16M4 12h16M4 18h16"></path>
-                        </svg>
-                    </button>
     
                     <div class="flex items-center space-x-4">
-                        <select v-model="sortOrder" @change="sortQuotes" class="border rounded px-2 py-1">
+                        <button 
+                          @click="showAddQuoteDialog = true"
+                          class="bg-violet-500 hover:bg-violet-600 text-white px-4 py-1 rounded flex items-center gap-2">
+                          <i class="fas fa-plus"></i>
+                          Add
+                        </button>
+                        <button 
+                          @click="showImportDialog = true"
+                          class="bg-white border border-violet-200 hover:bg-violet-200 text-violet-700 stroke-violet-700 px-4 py-1 rounded flex items-center gap-2">
+                          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                          Import
+                        </button>
+                        <select v-model="sortOrder" @change="sortQuotes" class="border border-customPurple-500 rounded px-2 py-1">
                             <option value="asc">Sort: Oldest First</option>
                             <option value="desc">Sort: Newest First</option>
                         </select>
@@ -121,12 +134,24 @@
                 </div>
                 <div class="mt-6 flex justify-center">
                     <button @click="loadMore" v-if="hasMoreQuotes"
-                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                        class="bg-white-500 text-customPurple-900 border hover:bg-customPurple-300 border-customPurple-500 px-4 py-2 rounded">
                         Load More
                     </button>
                 </div>
             </div>
         </div>
+
+        <!-- Add Quote Dialog -->
+        <AddQuoteDialog 
+          :is-open="showAddQuoteDialog"
+          @close="showAddQuoteDialog = false"
+          @quote-added="handleQuoteAdded" />
+
+        <!-- Import Kindle Dialog -->
+        <ImportKindleDialog 
+          :is-open="showImportDialog"
+          @close="showImportDialog = false"
+          @import-success="handleImportSuccess" />
     </div>
 </template>
 
@@ -138,6 +163,8 @@ import { useQuotesStore, useDataProcessorStore, useBooksStore } from '@/stores'
 import FileSaver from "file-saver"
 import Popover from '@/components/Popover.vue'
 import QuoteContent from '@/components/QuoteContent.vue'
+import AddQuoteDialog from '@/components/AddQuoteDialog.vue'
+import ImportKindleDialog from '@/components/ImportKindleDialog.vue'
 
 // Initialize stores
 const quotesStore = useQuotesStore()
@@ -161,6 +188,8 @@ const favouriteOnly = ref(false)
 const colorOptions = ["yellow", "red", "pink", "blue", "green", "orange", "gray", "purple"]
 const selectedColor = ref(null)
 const sidebarOpen = ref(false)
+const showAddQuoteDialog = ref(false)
+const showImportDialog = ref(false)
 
 // Computed properties
 const uniqueBooks = computed(() => {
@@ -284,6 +313,16 @@ const handleEdit = async (quote) => {
     })
 }
 
+const handleQuoteAdded = (newQuote) => {
+    // Optionally scroll to the new quote or show a success message
+    console.log('New quote added:', newQuote)
+}
+
+const handleImportSuccess = (data) => {
+    // Handle successful import if needed
+    console.log('Import completed successfully:', data)
+}
+
 const exportFile = () => {
     const content = dataProcessor.exportToKindleFormat()
     const blob = new Blob([content], {
@@ -361,60 +400,6 @@ const formatDate = (dateString) => {
 onMounted(() => {
     // Add resize event listener
     window.addEventListener('resize', handleResize)
-
-    if (quotesStore.quoteCount === 0) {
-        // Add some sample quotes with individual colors
-        const sampleQuotes = [
-            {
-                text: 'It is our choices, Harry, that show what we truly are, far more than our abilities.',
-                bookTitle: 'Harry Potter and the Chamber of Secrets',
-                author: 'J.K. Rowling',
-                location: '245',
-                page: 120,
-                tags: ['choices', 'character'],
-                color: 'blue'
-            },
-            {
-                text: 'Happiness can be found, even in the darkest of times, if one only remembers to turn on the light.',
-                bookTitle: 'Harry Potter and the Prisoner of Azkaban',
-                author: 'J.K. Rowling',
-                location: '387',
-                page: 189,
-                tags: ['hope', 'wisdom'],
-                color: 'yellow'
-            },
-            {
-                text: 'It takes a great deal of bravery to stand up to our enemies, but just as much to stand up to our friends.',
-                bookTitle: 'Harry Potter and the Sorcerer\'s Stone',
-                author: 'J.K. Rowling',
-                location: '198',
-                page: 95,
-                tags: ['courage', 'friendship'],
-                color: 'green'
-            }
-        ]
-
-        sampleQuotes.forEach(quoteData => {
-            // First ensure the book exists
-            let book = booksStore.getBookByTitle(quoteData.bookTitle)
-            if (!book) {
-                book = booksStore.addBook({
-                    title: quoteData.bookTitle,
-                    author: quoteData.author,
-                    tags: ['sample']
-                })
-            }
-
-            // Add quote with book relationship
-            const quote = quotesStore.addQuote({
-                ...quoteData,
-                bookId: book.id
-            })
-
-            // Link quote to book
-            booksStore.addQuoteToBook(book.id, quote.id)
-        })
-    }
 })
 
 // Cleanup event listeners

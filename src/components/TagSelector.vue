@@ -1,6 +1,6 @@
 <template>
     <div class="w-44 relative">
-      <button @click="toggleDropdown" class="flex items-center justify-between w-full p-2 border border-purple-300 rounded bg-white">
+      <button @click="toggleDropdown" class="flex items-center justify-between w-full p-2 border border-purple-300 rounded bg-white hover:bg-customPurple-100">
         <span class="flex items-center">
           <i class="fas fa-tags mr-2"></i> Tags
         </span>
@@ -8,19 +8,24 @@
       </button>
       <div v-if="dropdownVisible" class="absolute bg-white border border-gray-300 rounded w-full mt-2 z-10">
         <div
-          v-for="option in filteredTags"
-          :key="option"
-          @click="toggleTag(option)"
-          class="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100"
+          class="max-h-64 overflow-y-auto"
         >
-          <input
-            type="checkbox"
-            :checked="selectedTags.includes(option)"
-            class="mr-2"
-          />
-          {{ option }}
+          <div
+            v-for="option in filteredTags"
+            :key="option"
+            @click="toggleTag(option)"
+            class="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100"
+          >
+            <input
+              type="checkbox"
+              :checked="selectedTags.includes(option)"
+              class="mr-2"
+              @change.stop
+            />
+            {{ option }}
+          </div>
         </div>
-        <button @click="applyFilter" class="w-full bg-purple-500 text-white py-2 rounded-b">
+        <button @click="applyFilter" class="w-full bg-violet-500 text-white py-2 rounded-b">
           Filter
         </button>
       </div>
@@ -70,7 +75,5 @@
   </script>
   
   <style scoped>
-  button {
-    outline: none;
-  }
+
   </style>

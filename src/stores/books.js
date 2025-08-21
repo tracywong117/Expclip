@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { generateBookId } from '../utils/helpers.js'
+import { StorageService } from '../services/StorageService.js'
 
 export const useBooksStore = defineStore('books', () => {
-  // State
-  const books = ref([])
+  // State - Initialize from localStorage
+  const books = ref(StorageService.loadBooks())
   const loading = ref(false)
   const error = ref(null)
 
@@ -125,6 +126,35 @@ export const useBooksStore = defineStore('books', () => {
     return book ? book.quoteIds : []
   }
 
+  // Backup/Restore methods
+  function clearAllBooks() {
+    books.value = []
+  }
+
+  function restoreBook(bookData) {
+    // Restore a book from backup data
+    const restoredBook = {
+      ...bookData,
+      // Ensure required fields exist
+      id: bookData.id || generateBookId(),
+      quoteIds: bookData.quoteIds || [],
+      noteIds: bookData.noteIds || [],
+      highlightCount: bookData.highlightCount || 0,
+      isFavorite: bookData.isFavorite || false,
+      dateAdded: bookData.dateAdded || new Date().toISOString(),
+      lastModified: bookData.lastModified || new Date().toISOString(),
+      tags: bookData.tags || [],
+      stars: bookData.stars || 0
+    }
+    books.value.push(restoredBook)
+    return restoredBook
+  }
+
+  // Auto-save to localStorage whenever books change
+  watch(books, (newBooks) => {
+    StorageService.saveBooks(newBooks)
+  }, { deep: true })
+
   return {
     // State
     books,
@@ -150,6 +180,8 @@ export const useBooksStore = defineStore('books', () => {
     clearError,
     addQuoteToBook,
     removeQuoteFromBook,
-    getBookQuotes
+    getBookQuotes,
+    clearAllBooks,
+    restoreBook
   }
 })

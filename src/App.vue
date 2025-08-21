@@ -7,7 +7,7 @@
                 <img src="/icons/logo.svg" class="w-4/5" />
             </div>
             <div class="flex justify-start gap-4 self-start mx-8 mb-4">
-                <Popover position="bottom">
+                <Popover position="bottom" ref="addNewPopover">
                     <template #trigger>
                         <Tooltip position="bottom" autoHideDelay=0>
                             <button class="rounded-full flex p-2 bg-customPurple-200 hover:bg-customPurple-400 transition-colors duration-200 stroke-customPurple-900">
@@ -22,10 +22,12 @@
                         </Tooltip>
                     </template>
                     <div class="py-1 flex flex-col text-[14px]">
-                        <div class="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors">
+                        <div class="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors"
+                             @click="handleAddBook">
                             <span>Add new books</span>
                         </div>
-                        <div class="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors">
+                        <div class="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors"
+                             @click="handleAddQuote">
                             <span>Add new quotes</span>
                         </div>
                     </div>
@@ -52,44 +54,10 @@
                     </template>
                 </Tooltip>
 
-                <Dialog v-model:show="showImportDialog">
-                    <div class="">
-                        <div class="text-xl font-semibold mb-3">Import Highlights from Kindle</div>
-                        <div class="text-md text-gray-500 mb-3">
-                            Kindle Clippings is the file that contains all the highlights and notes you've made on your Kindle device. You can import this file to get all your highlights and notes in one place.
-                        </div>
-                        <label class="border-dashed border-2 border-gray-300 p-10 text-center cursor-pointer hover:border-gray-400 transition block w-[50%] mx-auto">
-                            <div class="flex flex-col items-center">
-                                <img src="icons/file-text.svg" class="w-10 h-10 mb-2" alt="File icon" />
-                                <p v-if="!fileName" class="text-lg">
-                                    Drop <em class="text-customPurple-600">My Clipping.txt</em> here
-                                </p>
-                                <p v-else class="text-lg">
-                                    Selected file: <em class="text-customPurple-600">{{ fileName }}</em>
-                                </p>
-                            </div>
-                            <input type="file" class="hidden" accept=".txt" @change="handleFileUpload" />
-                        </label>
-    
-                        <!-- Progress bar -->
-                        <div v-if="uploadProgress > 0" class="mt-5 w-[50%] mx-auto">
-                            <div class="bg-gray-200 rounded-full h-2.5">
-                                <div class="bg-lime-500 h-2.5 rounded-full" :style="{ width: uploadProgress + '%' }"></div>
-                            </div>
-                            <p class="text-center mt-2 text-sm text-gray-500">{{ uploadProgress }}% uploaded</p>
-                        </div>
-    
-                        <!-- Upload and Cancel buttons -->
-                        <div class="flex justify-center mt-5 space-x-4">
-                            <button v-if="!isUploading" @click="uploadFile" class="bg-green-200 text-green-800 hover:bg-green-400 hover:text-green-900 px-10 py-2 rounded-lg transition-colors">
-                                Upload
-                            </button>
-                            <button v-if="isUploading" @click="cancelUpload" class="bg-red-200 text-red-800 hover:bg-red-400 hover:text-red-900 px-10 py-2 rounded-lg transition-colors">
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
-                </Dialog>
+                <ImportKindleDialog 
+                  :is-open="showImportDialog"
+                  @close="showImportDialog = false"
+                  @import-success="handleImportSuccess" />
             </div>
             <div class="w-full flex flex-col text-gray-500">
                 <div v-for="item in navItems" :key="item.to" class="mb-2">
@@ -103,15 +71,26 @@
         <nav class="flex flex-col items-center h-[70px]">
             <div class="w-full flex flex-row border-t justify-between items-center">
                 <div>
-                    <AccountPopover />
+                    <div class=""></div>
+                    <DataBackupPopover />
                 </div>
                 <div class="flex gap-1">
-                    <div class="hover:bg-customPurple-200 p-2 rounded-lg">
-                        <img src="/icons/help-line.svg" class="w-5 h-5" />
-                    </div>
-                    <div class="hover:bg-customPurple-200 p-2 rounded-lg">
-                        <img src="/icons/settings-outline.svg" class="w-5 h-5" />
-                    </div>
+                    <Tooltip position="top" autoHideDelay=0>
+                        <div class="hover:bg-customPurple-200 p-2 rounded-lg cursor-pointer" @click="showAboutDialog = true">
+                            <img src="/icons/help-line.svg" class="w-5 h-5" />
+                        </div>
+                        <template #content>
+                            About Expclip
+                        </template>
+                    </Tooltip>
+                    <Tooltip position="top" autoHideDelay=0>
+                        <div class="hover:bg-customPurple-200 p-2 rounded-lg cursor-pointer" @click="showSettingsDialog = true">
+                            <img src="/icons/settings-outline.svg" class="w-5 h-5" />
+                        </div>
+                        <template #content>
+                            Settings
+                        </template>
+                    </Tooltip>
                 </div>
                 <div>
                 </div>
@@ -157,19 +136,46 @@
             <router-view />
         </div>
     </main>
+
+    <!-- Add Book Dialog -->
+    <AddBookDialog 
+      :is-open="showAddBookDialog"
+      @close="showAddBookDialog = false"
+      @book-added="handleBookAdded" />
+
+    <!-- Add Quote Dialog -->
+    <AddQuoteDialog 
+      :is-open="showAddQuoteDialog"
+      @close="showAddQuoteDialog = false"
+      @quote-added="handleQuoteAdded" />
+
+    <!-- About Dialog -->
+    <AboutDialog 
+      :is-open="showAboutDialog"
+      @close="showAboutDialog = false" />
+
+    <!-- Settings Dialog -->
+    <SettingsDialog 
+      :show="showSettingsDialog"
+      @update:show="showSettingsDialog = $event" />
 </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { useDataProcessorStore } from '@/stores'
-import AccountPopover from '@/components/AccountPopover.vue'
+import { useRouter } from 'vue-router'
+import DataBackupPopover from '@/components/DataBackupPopover.vue'
 import Tooltip from '@/components/Tooltip.vue'
 import Popover from '@/components/Popover.vue'
 import Dialog from '@/components/Dialog.vue'
+import AddBookDialog from '@/components/AddBookDialog.vue'
+import AddQuoteDialog from '@/components/AddQuoteDialog.vue'
+import ImportKindleDialog from '@/components/ImportKindleDialog.vue'
+import AboutDialog from '@/components/AboutDialog.vue'
+import SettingsDialog from '@/components/SettingsDialog.vue'
 
-// Initialize store
-const dataProcessor = useDataProcessorStore()
+// Initialize router
+const router = useRouter()
 
 // Reactive data
 const navItems = ref([
@@ -177,6 +183,11 @@ const navItems = ref([
         to: '/',
         label: 'Home',
         icon: '/icons/house.svg'
+    },
+    {
+        to: '/quotes',
+        label: 'Quotes',
+        icon: '/icons/bookmark.svg'
     },
     {
         to: '/books',
@@ -189,11 +200,6 @@ const navItems = ref([
         icon: '/icons/line-chart.svg'
     },
     {
-        to: '/quotes',
-        label: 'Quotes',
-        icon: '/icons/bookmark.svg'
-    },
-    {
         to: '/export',
         label: 'Export',
         icon: '/icons/export.svg'
@@ -204,11 +210,11 @@ const isOpen = ref(false)
 const isMobile = ref(false)
 const showBooks = ref(false)
 const showImportDialog = ref(false)
-const fileName = ref('')
-const uploadProgress = ref(0)
-const isUploading = ref(false)
-const uploadInterval = ref(null)
-const selectedFile = ref(null)
+const showAddBookDialog = ref(false)
+const showAddQuoteDialog = ref(false)
+const showAboutDialog = ref(false)
+const showSettingsDialog = ref(false)
+const addNewPopover = ref(null)
 
 // Methods
 const checkMobile = () => {
@@ -219,64 +225,35 @@ const toggleNav = () => {
     isOpen.value = !isOpen.value
 }
 
-const handleFileUpload = (event) => {
-    const file = event.target.files[0]
-    if (file) {
-        fileName.value = file.name
-        selectedFile.value = file
-    } else {
-        fileName.value = ''
-        selectedFile.value = null
+const handleImportSuccess = (data) => {
+    // Handle successful import if needed
+    console.log('Import completed successfully:', data)
+}
+
+const handleBookAdded = (newBook) => {
+    // Navigate to the new book's page
+    router.push(`/books/${newBook.id}`)
+}
+
+const handleQuoteAdded = (newQuote) => {
+    // Navigate to the quotes page
+    router.push('/quotes')
+}
+
+const handleAddBook = () => {
+    showAddBookDialog.value = true
+    // Close the popover
+    if (addNewPopover.value && addNewPopover.value.closePopover) {
+        addNewPopover.value.closePopover()
     }
 }
 
-const uploadFile = async () => {
-    if (isUploading.value || !selectedFile.value) return
-
-    isUploading.value = true
-    uploadProgress.value = 0
-
-    try {
-        // Simulate upload progress
-        uploadInterval.value = setInterval(() => {
-            if (uploadProgress.value < 90) {
-                uploadProgress.value += 5
-            }
-        }, 100)
-
-        // Read and process the file
-        const content = await selectedFile.value.text()
-        const result = await dataProcessor.parseKindleClippings(content)
-        
-        // Complete the progress
-        uploadProgress.value = 100
-        
-        // Show success message
-        setTimeout(() => {
-            alert(`Successfully imported ${result.quotesProcessed} quotes from ${result.booksProcessed} books!`)
-            showImportDialog.value = false
-            fileName.value = ''
-            selectedFile.value = null
-            uploadProgress.value = 0
-            
-            if (result.errors.length > 0) {
-                console.warn('Some errors occurred during import:', result.errors)
-            }
-        }, 500)
-        
-    } catch (error) {
-        console.error('Error processing file:', error)
-        alert('Error processing file. Please make sure it\'s a valid Kindle clippings file.')
-    } finally {
-        clearInterval(uploadInterval.value)
-        isUploading.value = false
+const handleAddQuote = () => {
+    showAddQuoteDialog.value = true
+    // Close the popover
+    if (addNewPopover.value && addNewPopover.value.closePopover) {
+        addNewPopover.value.closePopover()
     }
-}
-
-const cancelUpload = () => {
-    clearInterval(uploadInterval.value)
-    uploadProgress.value = 0
-    isUploading.value = false
 }
 
 // Lifecycle hooks
@@ -287,9 +264,6 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
     window.removeEventListener('resize', checkMobile)
-    if (uploadInterval.value) {
-        clearInterval(uploadInterval.value)
-    }
 })
 </script>
 
@@ -298,4 +272,19 @@ body {
     font-family: 'Poppins', 'Inter', 'DM Sans', 'Mona Sans', Arial, sans-serif;
     /* font-family: 'Inter', Arial, sans-serif; */
 }
+
+/* Tailwind CSS does not support @apply for pseudo-classes like :focus directly in global CSS.
+    However, you can use @apply in a custom class and then use that class in your template. 
+    For global focus styles, you still need to write plain CSS. 
+    Example using Tailwind utility classes: */
+
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgb(139 92 246);
+}
+
+/* Note: This works only if your build setup supports @apply in selectors with pseudo-classes.
+    If not, use Tailwind classes directly on your elements, or keep the plain CSS as before. */
 </style>
