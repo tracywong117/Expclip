@@ -62,7 +62,7 @@
             <div class="flex flex-col justify-between space-y-4 px-10 py-8 border rounded-lg">
                 <div class="flex flex-row items-center justify-between mb-4">
                     <div>
-                        <img src="icons/block-quote-line.svg" class="w-20 h-20 text-gray-400" />
+                        <img src="/icons/block-quote-line.svg" class="w-20 h-20 text-gray-400" />
                         <span class="text-xl font-semibold ">Today's Quote</span>
                     </div>
                     <ViewAll to="/quotes" />
@@ -80,27 +80,27 @@
                 <div class="grid grid-cols-2 gap-4 mt-4">
                     <div class="text-[14px] text-gray-500  
         rounded px-2 py-1 flex items-center">
-                        <img src="icons/pdf.svg" class="w-8 h-8 mr-2" alt="PDF icon" />
+                        <img src="/icons/pdf.svg" class="w-8 h-8 mr-2" alt="PDF icon" />
                         PDF
                     </div>
                     <div class="text-[14px] text-gray-500  
         rounded px-2 py-1 flex items-center">
-                        <img src="icons/txt.svg" class="w-8 h-8 mr-2" alt="TXT icon" />
+                        <img src="/icons/txt.svg" class="w-8 h-8 mr-2" alt="TXT icon" />
                         TXT
                     </div>
                     <!-- <div class="text-[14px] text-gray-500  
         rounded px-2 py-1 flex items-center">
-                        <img src="icons/png.svg" class="w-8 h-8 mr-2" alt="PNG icon" />
+                        <img src="/icons/png.svg" class="w-8 h-8 mr-2" alt="PNG icon" />
                         PNG
                     </div> -->
                     <div class="text-[14px] text-gray-500  
         rounded px-2 py-1 flex items-center">
-                        <img src="icons/docx.svg" class="w-8 h-8 mr-2" alt="DOCX icon" />
+                        <img src="/icons/docx.svg" class="w-8 h-8 mr-2" alt="DOCX icon" />
                         DOCX
                     </div>
                     <div class="text-[14px] text-gray-500  
         rounded px-2 py-1 flex items-center">
-                        <img src="icons/csv.svg" class="w-8 h-8 mr-2" alt="CSV icon" />
+                        <img src="/icons/csv.svg" class="w-8 h-8 mr-2" alt="CSV icon" />
                         CSV
                     </div>
                 </div>
@@ -109,7 +109,7 @@
             <!-- <label class="mt-4 border-dashed border-2 border-gray-300 p-10 text-center cursor-pointer hover:border-gray-400 transition block">
                     <p class="text-lg">
                         <div class="flex flex-col items-center">
-                            <img src="icons/file-text.svg" class="w-10 h-10 mb-2" />
+                            <img src="/icons/file-text.svg" class="w-10 h-10 mb-2" />
                             <p>Drop <em class="text-lime-600">My Clipping.txt</em> here</p>
                         </div>
                     </p>

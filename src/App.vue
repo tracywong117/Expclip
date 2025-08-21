@@ -103,7 +103,7 @@
     <main class="flex-1 md:ml-[250px] overflow-y-auto">
         <!-- Mobile Nav -->
         <div class="mobile-nav flex justify-between items-center p-4 shadow-md md:hidden">
-            <img src="icons/logo.svg" class="h-12" />
+            <img src="/icons/logo.svg" class="h-12" />
             <button @click="toggleNav" class="focus:outline-none">
                 <span :class="{ 'transform rotate-45': isOpen }" class="block w-6 h-0.5 bg-black mb-1 transition-transform"></span>
                 <span :class="{ 'opacity-0': isOpen }" class="block w-6 h-0.5 bg-black mb-1 transition-opacity"></span>

@@ -24,9 +24,9 @@
             <div class="flex items-center justify-between">
               <span>Theme</span>
               <div class="flex">
-                <img class="w-[26px] h-[26px] hover:bg-gray-100 px-1 rounded" src="icons/mode-light.svg">
-                <img class="w-[26px] h-[26px] hover:bg-gray-100 px-1 rounded" src="icons/mode-dark.svg">
-                <img class="w-[26px] h-[26px] hover:bg-gray-100 px-1 rounded" src="icons/mode-system.svg">
+                <img class="w-[26px] h-[26px] hover:bg-gray-100 px-1 rounded" src="/icons/mode-light.svg">
+                <img class="w-[26px] h-[26px] hover:bg-gray-100 px-1 rounded" src="/icons/mode-dark.svg">
+                <img class="w-[26px] h-[26px] hover:bg-gray-100 px-1 rounded" src="/icons/mode-system.svg">
               </div>
             </div>
           </div>
