@@ -182,27 +182,27 @@ const navItems = ref([
     {
         to: '/',
         label: 'Home',
-        icon: '/icons/house.svg'
+        icon: 'icons/house.svg'
     },
     {
         to: '/quotes',
         label: 'Quotes',
-        icon: '/icons/bookmark.svg'
+        icon: 'icons/bookmark.svg'
     },
     {
         to: '/books',
         label: 'Books',
-        icon: '/icons/book.svg'
+        icon: 'icons/book.svg'
     },
     {
         to: '/stats',
         label: 'Statistics',
-        icon: '/icons/line-chart.svg'
+        icon: 'icons/line-chart.svg'
     },
     {
         to: '/export',
         label: 'Export',
-        icon: '/icons/export.svg'
+        icon: 'icons/export.svg'
     }
 ])
 
