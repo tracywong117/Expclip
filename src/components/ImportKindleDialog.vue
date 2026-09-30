@@ -1,185 +1,51 @@
 <template>
-  <Dialog :show="isOpen" @update:show="handleDialogClose">
-    <div class="">
-      <div class="text-xl font-semibold mb-3">Import Highlights from Kindle</div>
-      <div class="text-md text-gray-500 mb-3">
-        Kindle Clippings is the file that contains all the highlights and notes you've made on your Kindle device. You can import this file to get all your highlights and notes in one place.
-      </div>
-      <label class="border-dashed border-2 border-gray-300 p-10 text-center cursor-pointer hover:border-gray-400 transition block w-[70%] mx-auto">
-        <div class="flex flex-col items-center">
-          <img src="/icons/file-text.svg" class="w-10 h-10 mb-2" alt="File icon" />
-          <p v-if="!fileName" class="text-lg">
-            Drop <em class="text-purple-600">My Clipping.txt</em> here
-          </p>
-          <p v-else class="text-lg">
-            Selected file: <em class="text-purple-600">{{ fileName }}</em>
-          </p>
-        </div>
-        <input type="file" class="hidden" accept=".txt" @change="handleFileUpload" />
-      </label>
-
-      <!-- Progress bar -->
-      <div v-if="uploadProgress > 0" class="mt-5 w-[50%] mx-auto">
-        <div class="bg-gray-200 rounded-full h-2.5">
-          <div class="bg-lime-500 h-2.5 rounded-full" :style="{ width: uploadProgress + '%' }"></div>
-        </div>
-        <p class="text-center mt-2 text-sm text-gray-500">{{ uploadProgress }}% uploaded</p>
-      </div>
-
-      <!-- Upload and Cancel buttons -->
-      <div class="flex justify-center mt-5 space-x-4">
-        <button 
-          v-if="!isUploading" 
-          @click="uploadFile" 
-          :disabled="!selectedFile"
-          class="bg-green-200 text-green-800 hover:bg-green-400 hover:text-green-900 px-10 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-          Upload
-        </button>
-        <button 
-          v-if="isUploading" 
-          @click="cancelUpload" 
-          class="bg-red-200 text-red-800 hover:bg-red-400 hover:text-red-900 px-10 py-2 rounded-lg transition-colors">
-          Cancel
-        </button>
-      </div>
-    </div>
+  <Dialog :show="isOpen" @update:show="handleClose">
+    <div class="modal-head"><div><span>IMPORT FROM KINDLE</span><h2>Bring in your highlights</h2></div><button @click="close">×</button></div>
+    <p class="intro">Upload the <strong>My Clippings.txt</strong> file from your Kindle. We’ll organize the books and passages automatically.</p>
+    <label class="drop-zone" :class="{selected:selectedFile,dragging:dragDepth>0}" @dragenter.prevent.stop="handleDragEnter" @dragover.prevent.stop="handleDragOver" @dragleave.prevent.stop="handleDragLeave" @drop.prevent.stop="handleDrop">
+      <input type="file" accept=".txt,text/plain" :disabled="isUploading" @change="handleFileUpload">
+      <span class="file-icon">↥</span>
+      <template v-if="dragDepth>0"><strong>Drop your clipping file here</strong><small>Release to select your file</small><em>One TXT file at a time</em></template>
+      <template v-else-if="selectedFile"><strong>{{ fileName }}</strong><small>{{ formatSize(selectedFile.size) }} · Ready to import</small><em>Choose a different file</em></template>
+      <template v-else><strong>Choose your clipping file</strong><small>Drop it here or click to browse</small><em>TXT files only</em></template>
+    </label>
+    <div class="privacy-note"><span>◆</span><p><strong>Private and local</strong>Your file is processed in this browser and is never uploaded.</p></div>
+    <div v-if="isUploading" class="progress"><div><span>Importing your reading history…</span><b>{{uploadProgress}}%</b></div><i><em :style="{width:uploadProgress+'%'}"></em></i></div>
+    <div v-if="message" role="status" :class="['message',success?'success':'error']">{{message}}</div>
+    <div class="modal-footer"><button class="cancel" @click="close">Cancel</button><button class="submit" :disabled="!selectedFile||isUploading" @click="uploadFile">{{isUploading?'Importing…':'Import highlights'}}</button></div>
   </Dialog>
 </template>
-
 <script setup>
-import { ref, watch, onBeforeUnmount } from 'vue'
+import { ref,watch,onBeforeUnmount } from 'vue'
 import { useDataProcessorStore } from '@/stores'
-import Dialog from '@/components/Dialog.vue'
-
-// Props
-const props = defineProps({
-  isOpen: {
-    type: Boolean,
-    default: false
+import Dialog from './Dialog.vue'
+const props=defineProps({isOpen:Boolean}),emit=defineEmits(['close','import-success','import-error']),dataProcessor=useDataProcessorStore()
+const fileName=ref(''),selectedFile=ref(null),uploadProgress=ref(0),isUploading=ref(false),timer=ref(null),message=ref(''),success=ref(false)
+const dragDepth=ref(0)
+const selectFiles=files=>{
+  if(isUploading.value||!files?.length)return
+  success.value=false
+  if(files.length!==1||!(/\.txt$/i.test(files[0].name)||files[0].type==='text/plain')){
+    selectedFile.value=null;fileName.value=''
+    message.value=files.length!==1?'Please choose one clipping file at a time.':'Please choose a TXT clipping file.'
+    return
   }
-})
-
-// Emits
-const emit = defineEmits(['close', 'import-success', 'import-error'])
-
-// Store
-const dataProcessor = useDataProcessorStore()
-
-// Reactive data
-const fileName = ref('')
-const uploadProgress = ref(0)
-const isUploading = ref(false)
-const uploadInterval = ref(null)
-const selectedFile = ref(null)
-
-// Methods
-const handleFileUpload = (event) => {
-  const file = event.target.files[0]
-  if (file) {
-    fileName.value = file.name
-    selectedFile.value = file
-  } else {
-    fileName.value = ''
-    selectedFile.value = null
-  }
+  selectedFile.value=files[0];fileName.value=files[0].name;message.value=''
 }
-
-const uploadFile = async () => {
-  if (isUploading.value || !selectedFile.value) return
-
-  isUploading.value = true
-  uploadProgress.value = 0
-
-  try {
-    // Simulate upload progress
-    uploadInterval.value = setInterval(() => {
-      if (uploadProgress.value < 90) {
-        uploadProgress.value += 5
-      }
-    }, 100)
-
-    // Read and process the file
-    const content = await selectedFile.value.text()
-    const result = await dataProcessor.parseKindleClippings(content)
-    
-    // Complete the progress
-    uploadProgress.value = 100
-    
-    // Show success message and emit success event
-    setTimeout(() => {
-      const message = `Successfully imported ${result.quotesProcessed} quotes from ${result.booksProcessed} books!`
-      alert(message)
-      
-      emit('import-success', {
-        result,
-        message
-      })
-      
-      closeDialog()
-      
-      if (result.errors.length > 0) {
-        console.warn('Some errors occurred during import:', result.errors)
-      }
-    }, 500)
-    
-  } catch (error) {
-    console.error('Error processing file:', error)
-    const errorMessage = 'Error processing file. Please make sure it\'s a valid Kindle clippings file.'
-    alert(errorMessage)
-    
-    emit('import-error', {
-      error,
-      message: errorMessage
-    })
-  } finally {
-    clearInterval(uploadInterval.value)
-    isUploading.value = false
-  }
-}
-
-const cancelUpload = () => {
-  clearInterval(uploadInterval.value)
-  uploadProgress.value = 0
-  isUploading.value = false
-}
-
-const closeDialog = () => {
-  resetForm()
-  emit('close')
-}
-
-const handleDialogClose = (show) => {
-  if (!show) {
-    closeDialog()
-  }
-}
-
-const resetForm = () => {
-  fileName.value = ''
-  selectedFile.value = null
-  uploadProgress.value = 0
-  isUploading.value = false
-  if (uploadInterval.value) {
-    clearInterval(uploadInterval.value)
-    uploadInterval.value = null
-  }
-}
-
-// Reset form when dialog opens/closes
-watch(() => props.isOpen, (newValue) => {
-  if (!newValue) {
-    resetForm()
-  }
-})
-
-// Cleanup on component unmount
-onBeforeUnmount(() => {
-  if (uploadInterval.value) {
-    clearInterval(uploadInterval.value)
-  }
-})
+const handleFileUpload=e=>{selectFiles(e.target.files);e.target.value=''}
+const handleDragEnter=()=>{if(!isUploading.value)dragDepth.value++}
+const handleDragOver=e=>{if(e.dataTransfer)e.dataTransfer.dropEffect=isUploading.value?'none':'copy'}
+const handleDragLeave=()=>{dragDepth.value=Math.max(0,dragDepth.value-1)}
+const handleDrop=e=>{dragDepth.value=0;selectFiles(e.dataTransfer?.files)}
+const formatSize=bytes=>bytes<1024?`${bytes} B`:`${(bytes/1024).toFixed(1)} KB`
+const uploadFile=async()=>{if(!selectedFile.value||isUploading.value)return;isUploading.value=true;uploadProgress.value=8;message.value='';timer.value=setInterval(()=>{if(uploadProgress.value<88)uploadProgress.value+=4},80);try{const content=await selectedFile.value.text();const result=await dataProcessor.parseKindleClippings(content);uploadProgress.value=100;success.value=true;message.value=`Imported ${result.quotesProcessed} highlights from ${result.booksProcessed} books.${result.duplicatesSkipped ? ` Skipped ${result.duplicatesSkipped} exact duplicate${result.duplicatesSkipped===1?'':'s'}.` : ''}`;emit('import-success',{result,message:message.value});setTimeout(close,700)}catch(error){success.value=false;message.value='That file could not be imported. Check that it is a valid Kindle clipping file.';emit('import-error',{error,message:message.value})}finally{clearInterval(timer.value);isUploading.value=false}}
+const reset=()=>{clearInterval(timer.value);dragDepth.value=0;fileName.value='';selectedFile.value=null;uploadProgress.value=0;isUploading.value=false;message.value=''}
+const close=()=>{reset();emit('close')}
+const handleClose=value=>{if(!value)close()}
+watch(()=>props.isOpen,value=>!value&&reset())
+onBeforeUnmount(()=>clearInterval(timer.value))
 </script>
-
 <style scoped>
-/* Add any component-specific styles here if needed */
+.drop-zone.dragging{border:2px dashed var(--olive);background:#e5ecdf;box-shadow:0 0 0 4px #52634e18}.drop-zone.dragging .file-icon{transform:translateY(-4px)}.file-icon{transition:transform .2s}
+.modal-head{display:flex;justify-content:space-between}.modal-head span{color:var(--accent);font-size:9px;font-weight:800;letter-spacing:.17em}.modal-head h2{margin:5px 0 0;font:500 31px Georgia,serif}.modal-head button{width:34px;height:34px;border:1px solid var(--line);border-radius:50%;background:transparent;color:#77736b;font-size:20px}.intro{max-width:530px;margin:11px 0 25px;color:var(--muted);font-size:12px;line-height:1.6}.intro strong{color:#4f4b43}.drop-zone{min-height:205px;padding:28px;border:1px dashed #aaa397;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-direction:column;background:#f7f4ed;text-align:center;cursor:pointer;transition:.2s}.drop-zone:hover,.drop-zone.selected{border-color:var(--olive);background:#f2f2e9}.drop-zone input{display:none}.file-icon{width:48px;height:48px;margin-bottom:15px;display:grid;place-items:center;border-radius:50%;background:#dfe4dc;color:#3e584d;font-size:24px}.drop-zone strong{font:600 16px Georgia,serif}.drop-zone small{margin-top:5px;color:var(--muted);font-size:10px}.drop-zone em{margin-top:17px;color:var(--accent);font:normal 10px sans-serif;font-weight:700}.privacy-note{margin-top:15px;padding:13px 15px;display:flex;gap:10px;border-radius:7px;background:#ebe6da}.privacy-note>span{color:var(--olive);font-size:9px}.privacy-note p{margin:0;color:var(--muted);font-size:10px;line-height:1.45}.privacy-note strong{display:block;color:#504d46}.progress{margin-top:16px}.progress>div{display:flex;justify-content:space-between;color:var(--muted);font-size:10px}.progress i{height:4px;margin-top:7px;display:block;border-radius:4px;background:#ded9ce;overflow:hidden}.progress em{height:100%;display:block;background:var(--accent)}.message{margin-top:14px;padding:11px;border-radius:6px;font-size:10px}.message.success{background:#e3ece4;color:#3b6545}.message.error{background:#f3dfd9;color:#9a4332}.modal-footer{margin-top:24px;padding-top:18px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px}.modal-footer button{min-height:39px;padding:0 16px;border-radius:6px;font-size:11px;font-weight:700}.cancel{border:1px solid var(--line);background:transparent}.submit{border:1px solid var(--accent);background:var(--accent);color:white}.submit:disabled{opacity:.4;cursor:not-allowed}
 </style>

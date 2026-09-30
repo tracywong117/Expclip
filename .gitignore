@@ -12,6 +12,16 @@ node_modules
 dist
 dist-ssr
 coverage
+# Local PDF previews, renders, and scratch bundles
+/tmp/
+/output/
+__pycache__/
+*.pyc
+# Local font files and accompanying license (keep setup instructions tracked)
+*.otf
+*.ttf
+/public/fonts/SourceHanSerif-LICENSE.txt
+/.venv-fonts/
 *.local
 
 /cypress/videos/

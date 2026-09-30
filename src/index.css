@@ -1,3 +1,86 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root { color: #24231f; background: #f4f1ea; font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-synthesis: none; --ink:#24231f; --muted:#737168; --paper:#fbfaf6; --canvas:#f4f1ea; --line:#ded9ce; --accent:#d95c3f; --accent-dark:#b94730; --olive:#596b56; --navy:#263a44; }
+* { box-sizing: border-box; }
+html { background: var(--canvas); }
+body { margin: 0; min-width: 320px; min-height: 100vh; background: var(--canvas); }
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+.app-shell { min-height: 100vh; }
+.sidebar { position: fixed; inset: 0 auto 0 0; z-index: 40; width: 248px; padding: 25px 20px 18px; display: flex; flex-direction: column; background: #222a27; color: #f6f3eb; }
+.brand-row { display:flex; align-items:center; justify-content:space-between; }
+.brand { display:flex; align-items:center; gap:11px; }
+.brand-mark { width:48px; height:48px; display:block; object-fit:contain; flex:none; }
+.brand strong { display:block; font:600 20px Georgia,serif; letter-spacing:.01em; }
+.brand small { display:block; margin-top:2px; color:#aeb9b3; font-size:10px; letter-spacing:.06em; text-transform:uppercase; }
+.primary-action { margin-top:34px; padding:12px 15px; border:0; border-radius:8px; display:flex; align-items:center; justify-content:center; gap:9px; background:var(--accent); color:white; font-weight:650; box-shadow:0 7px 20px rgba(0,0,0,.16); transition:.2s ease; }
+.primary-action:hover { background:#e36b4e; transform:translateY(-1px); }
+.primary-action span { font-size:20px; font-weight:300; line-height:1; }
+.main-nav { margin-top:25px; display:grid; gap:5px; }
+.main-nav a { padding:11px 13px; border-radius:8px; display:flex; align-items:center; gap:12px; color:#bec6c1; font-size:14px; font-weight:540; transition:.2s; }
+.main-nav a:hover { background:rgba(255,255,255,.06); color:white; }
+.main-nav a.router-link-exact-active, .main-nav a.router-link-active:not([href='/']) { background:#39433f; color:white; }
+.nav-icon { width:19px; height:19px; display:inline-grid; place-items:center; }
+.nav-icon svg { width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linejoin:round; stroke-linecap:round; }
+.main-nav a:nth-child(2) .nav-icon svg { fill:currentColor; stroke:none; }
+.sidebar-spacer { flex:1; }
+.sidebar-card { padding:14px; border:1px solid rgba(255,255,255,.09); border-radius:10px; background:rgba(255,255,255,.035); }
+.eyebrow { display:block; color:#9eaaa4; font-size:9px; font-weight:700; letter-spacing:.16em; }
+.sidebar-card strong { display:block; margin-top:8px; font:500 15px Georgia,serif; }
+.sidebar-card small { color:#b7c0bb; font-size:13px; line-height:1.5; }
+.progress-track { height:3px; margin:12px 0 8px; overflow:hidden; border-radius:4px; background:#505955; }
+.progress-track span { height:100%; display:block; background:#e2a347; border-radius:inherit; }
+.sidebar-footer { margin-top:15px; padding-top:14px; border-top:1px solid rgba(255,255,255,.08); display:flex; justify-content:space-between; }
+.sidebar-footer button { padding:6px 2px; border:0; background:none; color:#c4ccc8; font-size:13px; }
+.sidebar-footer button:hover { color:white; }
+.sidebar-utilities { display:flex; align-items:center; gap:4px; }
+.sidebar-footer .settings-button { display:grid; place-items:center; width:36px; height:36px; padding:0; border-radius:6px; }
+.sidebar-footer .settings-button:hover { background:rgba(255,255,255,.08); }
+.sidebar-footer .settings-button:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
+.main-area { min-height:100vh; margin-left:248px; }
+.topbar { height:74px; padding:0 38px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--line); background:rgba(251,250,246,.82); backdrop-filter:blur(16px); position:sticky; top:0; z-index:20; }
+.topbar-title span { display:block; color:#938f84; font-size:9px; font-weight:750; letter-spacing:.18em; }
+.topbar-title strong { display:block; margin-top:2px; font:500 21px Georgia,serif; }
+.topbar-actions { display:flex; align-items:center; gap:12px; }
+.ghost-button { padding:8px 12px; border:1px solid var(--line); border-radius:7px; background:transparent; color:#5d5b54; font-size:12px; }
+.ghost-button:hover { background:white; }
+.avatar { display:grid; place-items:center; padding:0; width:34px; height:34px; border:0; border-radius:50%; background:#d9c5a5; color:#4d3d2a; font-size:10px; font-weight:750; }
+.page-wrap { width:min(1180px, calc(100% - 70px)); margin:0 auto; padding:44px 0 64px; }
+.mobile-only { display:none; }
+.icon-button { border:0; background:transparent; color:inherit; font-size:23px; }
+.page-heading { display:flex; align-items:end; justify-content:space-between; gap:24px; margin-bottom:30px; }
+.page-heading h1 { margin:0; font:500 clamp(34px,4vw,50px)/1.02 Georgia,serif; letter-spacing:-.025em; }
+.page-heading p { max-width:540px; margin:9px 0 0; color:var(--muted); font-size:14px; line-height:1.6; }
+.section-kicker { display:block; margin-bottom:9px; color:var(--accent); font-size:10px; font-weight:800; letter-spacing:.18em; }
+.button-primary,.button-secondary { min-height:39px; padding:0 15px; border-radius:7px; font-size:12px; font-weight:700; transition:.18s; }
+.button-primary { border:1px solid var(--accent); background:var(--accent); color:white; }
+.button-primary:hover { background:var(--accent-dark); border-color:var(--accent-dark); }
+.button-secondary { border:1px solid var(--line); background:var(--paper); color:var(--ink); }
+.button-secondary:hover { border-color:#aaa59a; background:white; }
+.panel { border:1px solid var(--line); border-radius:12px; background:var(--paper); box-shadow:0 10px 30px rgba(38,32,22,.035); }
+.search-field { position:relative; }
+.search-field input { width:100%; height:40px; padding:0 14px 0 38px; border:1px solid var(--line); border-radius:7px; background:var(--paper); outline:none; color:var(--ink); font-size:12px; }
+.search-field input:focus { border-color:#9f9a8f; box-shadow:0 0 0 3px rgba(89,107,86,.1); }
+.search-field::before { content:'⌕'; position:absolute; left:14px; top:7px; z-index:1; color:#7c796f; font-size:20px; }
+.empty-state { padding:70px 25px; text-align:center; border:1px dashed #cbc5b9; border-radius:12px; color:var(--muted); }
+.empty-state strong { display:block; margin-bottom:6px; color:var(--ink); font:500 21px Georgia,serif; }
+@media (max-width:840px){.sidebar{transform:translateX(-100%);transition:transform .25s ease;box-shadow:15px 0 40px rgba(0,0,0,.18)}.sidebar.open{transform:translateX(0)}.mobile-scrim{position:fixed;inset:0;z-index:35;background:rgba(24,25,22,.45)}.main-area{margin-left:0}.mobile-only{display:inline-grid}.topbar{padding:0 20px}.topbar-title{margin-right:auto;margin-left:14px}.page-wrap{width:min(100% - 32px,700px);padding-top:28px}}
+@media (max-width:560px){.page-heading{align-items:flex-start;flex-direction:column}.page-heading h1{font-size:36px}.hide-small{display:none}.topbar{height:64px}.page-wrap{width:calc(100% - 24px)}}
+
+/* Readability baseline for interactive and supporting text */
+input,select,textarea{font-size:14px!important;line-height:1.45}
+input::placeholder,textarea::placeholder{font-size:14px;color:#9a968d}
+.search-field input{font-size:14px!important}
+.button-primary,.button-secondary,.ghost-button{font-size:13px}
+.dialog-surface,.modal-card{font-size:14px}
+.dialog-surface p,.dialog-surface small,.modal-backdrop p,.modal-backdrop small{font-size:13px!important;line-height:1.55}
+.dialog-surface label,.modal-backdrop label,.modal-backdrop legend{font-size:12px!important}
+.dialog-surface button,.modal-backdrop button{font-size:13px!important}
+.dialog-surface .modal-head span,.modal-backdrop .modal-head span,.dialog-surface .confirm-copy>span,.dialog-surface .delete-copy>span{font-size:11px!important}
+.dialog-surface footer{font-size:12px!important}
+.dialog-surface .principles p,.dialog-surface .setting-row small,.dialog-surface .section-heading small,.dialog-surface .usage>div,.dialog-surface .usage>small,.dialog-surface .file-picker,.dialog-surface .preview,.dialog-surface .data-options p,.dialog-surface .data-options small,.dialog-surface .privacy-note p,.dialog-surface .progress>div,.dialog-surface .message{font-size:13px!important}
+.dialog-surface .collection-counts span,.dialog-surface .drop-zone small,.dialog-surface .drop-zone em{font-size:12px!important}
+.modal-backdrop label.favorite-check{font-size:13px!important}

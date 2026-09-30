@@ -2,6 +2,8 @@ import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 import { generateBookId } from '../utils/helpers.js'
 import { StorageService } from '../services/StorageService.js'
+import { useQuotesStore } from './quotes.js'
+import { useNotesStore } from './notes.js'
 
 export const useBooksStore = defineStore('books', () => {
   // State - Initialize from localStorage
@@ -43,6 +45,11 @@ export const useBooksStore = defineStore('books', () => {
   function updateBook(bookId, updates) {
     const index = books.value.findIndex(book => book.id === bookId)
     if (index !== -1) {
+      const source = books.value[index]
+      const edited = { ...source, ...updates }
+      const target = ('title' in updates || 'author' in updates) && books.value.find(book =>
+        book.id !== bookId && book.title === edited.title && book.author === edited.author)
+      if (target) return mergeBook(source, edited, target)
       books.value[index] = {
         ...books.value[index],
         ...updates,
@@ -53,9 +60,55 @@ export const useBooksStore = defineStore('books', () => {
     return null
   }
 
+  function mergeBook(source, edited, target) {
+    const quotesStore = useQuotesStore()
+    const notesStore = useNotesStore()
+    const movedQuotes = quotesStore.quotes.filter(quote => quote.bookId === source.id)
+    const movedIds = new Set(movedQuotes.map(quote => quote.id))
+    const sourceNoteIds = new Set(source.noteIds || [])
+    // Legacy notes only carry a title. Move them by title only if unambiguous.
+    const uniqueTitle = books.value.filter(book => book.title === source.title).length === 1
+    const movedNotes = notesStore.notes.filter(note => note.bookId === source.id ||
+      movedIds.has(note.quoteId) || sourceNoteIds.has(note.id) ||
+      (!note.bookId && !note.quoteId && uniqueTitle && note.bookTitle === source.title))
+    for (const quote of movedQuotes) {
+      quotesStore.updateQuote(quote.id, { bookId: target.id, bookTitle: target.title, author: target.author })
+    }
+    for (const note of movedNotes) {
+      notesStore.updateNote(note.id, { bookId: target.id, bookTitle: target.title })
+    }
+    const quoteIds = quotesStore.quotes.filter(quote => quote.bookId === target.id).map(quote => quote.id)
+    const merged = {
+      ...target,
+      quoteIds,
+      highlightCount: quoteIds.length,
+      noteIds: [...new Set([...(target.noteIds || []), ...(source.noteIds || []), ...movedNotes.map(note => note.id)])],
+      tags: [...new Set([...(target.tags || []), ...(edited.tags || [])])],
+      isFavorite: !!(target.isFavorite || edited.isFavorite),
+      stars: Math.max(target.stars || 0, edited.stars || 0),
+      cover: target.cover || edited.cover || '',
+      image: target.image || edited.image || '',
+      lastModified: new Date().toISOString(),
+    }
+    books.value = books.value.filter(book => book.id !== source.id)
+      .map(book => book.id === target.id ? merged : book)
+    return merged
+  }
+
   function deleteBook(bookId) {
     const index = books.value.findIndex(book => book.id === bookId)
     if (index !== -1) {
+      const book = books.value[index]
+      const quotesStore = useQuotesStore()
+      const notesStore = useNotesStore()
+      // The quote's bookId is authoritative, even if cached quoteIds are stale.
+      const quoteIds = new Set(quotesStore.quotes.filter(quote => quote.bookId === bookId).map(quote => quote.id))
+      const noteIds = new Set(book.noteIds || [])
+      const uniqueTitle = books.value.filter(item => item.title === book.title).length === 1
+      const relatedNotes = notesStore.notes.filter(note => note.bookId === bookId || quoteIds.has(note.quoteId) ||
+        (!note.bookId && !note.quoteId && (noteIds.has(note.id) || (uniqueTitle && note.bookTitle === book.title))))
+      for (const note of relatedNotes) notesStore.deleteNote(note.id)
+      for (const quoteId of quoteIds) quotesStore.deleteQuote(quoteId)
       books.value.splice(index, 1)
       return true
     }

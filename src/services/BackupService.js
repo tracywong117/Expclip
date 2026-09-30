@@ -1,5 +1,7 @@
 import { useBooksStore } from '@/stores/books'
 import { useQuotesStore } from '@/stores/quotes'
+import { useSettingsStore } from '@/stores/settings'
+import { tagColors } from '@/utils/tagColors'
 
 export default class BackupService {
   static generateBackup() {
@@ -12,6 +14,8 @@ export default class BackupService {
       books: booksStore.books,
       quotes: quotesStore.quotes,
       settings: {
+        bookTagColors: useSettingsStore().settings.bookTagColors || {},
+        highlightTagColors: useSettingsStore().settings.highlightTagColors || {},
         exportedFrom: 'Expclip',
         totalBooks: booksStore.books.length,
         totalQuotes: quotesStore.quotes.length
@@ -58,6 +62,14 @@ export default class BackupService {
       
       const booksStore = useBooksStore()
       const quotesStore = useQuotesStore()
+      for (const colorKey of ['bookTagColors','highlightTagColors']) {
+      const savedColors = backupData.settings?.[colorKey]
+      if (savedColors && typeof savedColors === 'object' && !Array.isArray(savedColors)) {
+        useSettingsStore().updateSetting(colorKey, Object.fromEntries(
+          Object.entries(savedColors).filter(([tag,color]) => tag.trim() && typeof color === 'string' && Object.hasOwn(tagColors,color))
+        ))
+      }
+      }
       
       // Clear existing data
       booksStore.clearAllBooks()

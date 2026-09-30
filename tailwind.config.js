@@ -1,7 +1,6 @@
 module.exports = {
-    purge: {
-      content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
-      safelist: [
+    content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
+    safelist: [
         // Custom purple shades
         'border-yellow-400', 'bg-yellow-50',
         'border-red-400', 'bg-red-50',
@@ -12,8 +11,6 @@ module.exports = {
         'border-gray-400', 'bg-gray-50',
         'border-purple-400', 'bg-purple-50',
       ],
-    },
-    darkMode: false, // or 'media' or 'class'
     theme: {
       extend: {
         colors: {

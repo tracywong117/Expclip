@@ -36,7 +36,7 @@ const routes = [
   {
     path: '/export',
     name: 'Export',
-    // component: () => import('./views/export.vue')
+    component: () => import('./views/export.vue')
   }
 ];
  

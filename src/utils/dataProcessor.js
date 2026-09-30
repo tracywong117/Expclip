@@ -1,88 +1,38 @@
 export const dataProcessor = {
     getInfo(s) {
-        let InfoLength = s.length;
-        let author_index_1 = s.indexOf('\r\n') - 1;
-        let author_index_0 = 0;
-        let book_index_0 = 0;
-        let book_index_1 = 0;
-        let page_index_0 = s.indexOf('on page ') + 'on page '.length;
-        let page_index_1 = 0;
-        let location_index_0 = s.indexOf('| location ') + '| location '.length;
-        let location_index_1 = 0;
-        let week_index_0 = s.indexOf("| Added on ") + '| Added on '.length;
-        let week_index_1 = 0;
-        let datetime_index_0 = 0;
-        let datetime_index_1 = 0;
-        let quote_index_0 = 0;
-
-        for (let i = author_index_1; i >= 0; i--) {
-            if (s[i] == '(') {
-                author_index_0 = i + 1;
-                book_index_1 = i - 1;
-                break;
-            }
-        }
-        for (let i = page_index_0; i < InfoLength; i++) {
-            if (s[i] == '|') {
-                page_index_1 = i - 1;
-                break;
-            }
-        }
-        for (let i = location_index_0; i < InfoLength; i++) {
-            if (s[i] == '|') {
-                location_index_1 = i - 1;
-                break;
-            }
-        }
-        for (let i = week_index_0; i < InfoLength; i++) {
-            if (s[i] == ',') {
-                week_index_1 = i;
-                datetime_index_0 = i + 2;
-                break;
-            }
-        }
-        for (let i = datetime_index_0; i < InfoLength; i++) {
-            if (s[i] == ':') {
-                datetime_index_1 = i + 6;
-                quote_index_0 = i + 10;
-                break;
-            }
-        }
-
+        const lines = s.replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n').trim().split('\n');
+        const heading = lines[0].trim();
+        const metadata = lines[1]?.trim() || '';
+        // Author is optional. Only a trailing parenthesized field is an author.
+        const author = heading.match(/^(.*)\s+\(([^()]*)\)$/);
+        // Read optional fields from metadata, never from the title or quote.
+        const page = metadata.match(/\bon\s+page\s+(\d+(?:\s*[-–]\s*\d+)?)/i)?.[1] || '';
+        const location = metadata.match(/\blocation\s+(\d+(?:\s*[-–]\s*\d+)?)/i)?.[1] || '';
+        const added = metadata.match(/\|\s*Added on\s+(.+)$/i)?.[1]?.trim() || '';
+        const date = added.match(/^([^,]+),\s*(.*)$/);
         return [
-            s.substring(book_index_0, book_index_1),
-            s.substring(author_index_0, author_index_1),
-            s.substring(page_index_0, page_index_1),
-            s.substring(location_index_0, location_index_1),
-            s.substring(week_index_0, week_index_1),
-            s.substring(datetime_index_0, datetime_index_1),
-            s.substring(quote_index_0,)
+            author ? author[1].trim() : heading,
+            author ? author[2].trim() : '',
+            page, location,
+            date ? date[1] : '',
+            date ? date[2] : added,
+            lines.slice(2).join('\n').trim()
         ];
     },
 
     processClippingsFile(content) {
-        let text = content + "\r\n";
-        let text_arr = text.split("==========\r\n");
-        let records = [];
-
-        for (let i = 0; i < text_arr.length; i++) {
-            let info = this.getInfo(text_arr[i]);
-            let record = {
-                "index": i,
-                "Book": info[0],
-                "Author": info[1],
-                "Page": info[2],
-                "Location": info[3],
-                "Week": info[4],
-                "Datetime": info[5],
-                "Quote": info[6],
-                "Editable": false,
-                "Color": "yellow",
+        // Support BOMs, different line endings, and missing final separators.
+        const entries = content.replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n')
+            .split(/^==========[ \t]*$/m).map(entry => entry.trim()).filter(Boolean);
+        return entries.map((entry, index) => {
+            const info = this.getInfo(entry);
+            return {
+                index,
+                Book: info[0], Author: info[1], Page: info[2], Location: info[3],
+                Week: info[4], Datetime: info[5], Quote: info[6],
+                Editable: false, Color: 'yellow',
             };
-            records.push(record);
-        }
-        records.pop();
-        return records;
+        });
     },
 
     generateExportContent(jsonRecords) {

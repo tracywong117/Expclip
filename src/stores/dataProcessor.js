@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { useBooksStore } from './books.js'
 import { useQuotesStore } from './quotes.js'
 import { dataProcessor } from '../utils/dataProcessor.js'
-import { useBookQuotes } from './useBookQuotes.js'
+import { clippingIdentity } from '../utils/clippingIdentity.js'
 
 export const useDataProcessorStore = defineStore('dataProcessor', () => {
   // State
@@ -15,7 +15,6 @@ export const useDataProcessorStore = defineStore('dataProcessor', () => {
   // Get other stores and composables
   const booksStore = useBooksStore()
   const quotesStore = useQuotesStore()
-  const { createBookWithQuotes } = useBookQuotes()
 
   // Actions
   function parseKindleClippings(fileContent) {
@@ -27,6 +26,13 @@ export const useDataProcessorStore = defineStore('dataProcessor', () => {
       const records = dataProcessor.processClippingsFile(fileContent)
       totalCount.value = records.length
       processedCount.value = 0
+      let duplicatesSkipped = 0
+      const savedBooks = new Map(booksStore.books.map(book => [book.id, book]))
+      const seen = new Set(quotesStore.quotes.map(quote => {
+        const book = savedBooks.get(quote.bookId)
+        if (!book) return null
+        return clippingIdentity({ ...quote, title: book.title, author: book.author })
+      }).filter(Boolean))
 
       const parsedData = {
         booksMap: new Map(), // Use Map for better performance
@@ -37,15 +43,25 @@ export const useDataProcessorStore = defineStore('dataProcessor', () => {
         try {
           const bookTitle = record.Book
           const author = record.Author
+          const dateHighlighted = parseDateTime(record.Week, record.Datetime)
+          const identity = clippingIdentity({
+            title: bookTitle, author, text: record.Quote, page: record.Page,
+            location: record.Location, dateHighlighted,
+          })
+          if (identity && seen.has(identity)) {
+            duplicatesSkipped++
+            processedCount.value++
+            return
+          }
 
           // Create or get book
           let book
-          const bookKey = `${bookTitle}|${author}` // Unique key for book
+          const bookKey = JSON.stringify([bookTitle, author])
           
           if (!parsedData.booksMap.has(bookKey)) {
             // Check if book already exists in store
-            const existingBook = booksStore.getBookByTitle(bookTitle)
-            if (existingBook && existingBook.author === author) {
+            const existingBook = booksStore.books.find(book => book.title === bookTitle && book.author === author)
+            if (existingBook) {
               book = existingBook
             } else {
               // Create new book
@@ -69,7 +85,7 @@ export const useDataProcessorStore = defineStore('dataProcessor', () => {
             author: author,
             location: record.Location,
             page: record.Page,
-            dateHighlighted: parseDateTime(record.Week, record.Datetime),
+            dateHighlighted: dateHighlighted || new Date().toISOString(),
             type: 'highlight',
             color: 'yellow' // Default color, each quote gets its own
           }
@@ -80,6 +96,7 @@ export const useDataProcessorStore = defineStore('dataProcessor', () => {
           booksStore.addQuoteToBook(book.id, newQuote.id)
           
           parsedData.quotesToAdd.push(newQuote)
+          if (identity) seen.add(identity)
           
           processedCount.value++
         } catch (error) {
@@ -94,6 +111,7 @@ export const useDataProcessorStore = defineStore('dataProcessor', () => {
       return {
         booksProcessed: parsedData.booksMap.size,
         quotesProcessed: parsedData.quotesToAdd.length,
+        duplicatesSkipped,
         errors: errors.value
       }
 
@@ -115,7 +133,7 @@ export const useDataProcessorStore = defineStore('dataProcessor', () => {
       const date = new Date(dateStr)
       return date.toISOString()
     } catch {
-      return new Date().toISOString()
+      return null
     }
   }
 
